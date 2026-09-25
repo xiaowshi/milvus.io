@@ -24,7 +24,11 @@ import CustomButton from '@/components/customButton';
 import { MilvusComponent } from './milvusComponent';
 import { checkIconTpl, copyIconTpl } from '@/components/icons';
 import { SizingVersionConfig, PricingPlanEnum } from './types';
-import { estimateMonthlyCost, formatCny } from '@/utils/sizingCost';
+import {
+  estimateMonthlyCost,
+  formatCny,
+  MONTHLY_UNIT_PRICES,
+} from '@/utils/sizingCost';
 
 enum InstallTypeEnum {
   Docker = 'docker',
@@ -134,6 +138,41 @@ export default function ResultSection(props: ResultSectionProps) {
     s3DiskGB,
     kafkaStorageGB,
   });
+  const unitPrices =
+    MONTHLY_UNIT_PRICES[pricingPlan as PricingPlanEnum] ??
+    MONTHLY_UNIT_PRICES[PricingPlanEnum.Shared];
+  const unitPriceRows = [
+    {
+      key: 'milvusCpu',
+      price: unitPrices.milvusCpuPerCore,
+      unit: 'Core',
+      subtotal: monthlyCost.milvusCpu,
+    },
+    {
+      key: 'milvusMemory',
+      price: unitPrices.milvusMemoryPerGiB,
+      unit: 'GiB',
+      subtotal: monthlyCost.milvusMemory,
+    },
+    {
+      key: 'milvusStorage',
+      price: unitPrices.milvusStoragePerGB,
+      unit: 'GB',
+      subtotal: monthlyCost.milvusStorage,
+    },
+    {
+      key: 's3Disk',
+      price: unitPrices.s3DiskPerGB,
+      unit: 'GB',
+      subtotal: monthlyCost.s3Disk,
+    },
+    {
+      key: 'kafkaStorage',
+      price: unitPrices.kafkaStoragePerGB,
+      unit: 'GB',
+      subtotal: monthlyCost.kafkaStorage,
+    },
+  ];
 
   const [isMilvusOpen, setIsMilvusOpen] = useState(true);
   const [isDependencyOpen, setIsDependencyOpen] = useState(true);
@@ -367,7 +406,40 @@ sudo docker compose up -d`,
         </div>
 
         <div className="p-[20px] border-b border-solid border-black4 flex items-center justify-between gap-[20px]">
-          <p className={classes.font14Bold}>{t('overview.estimatedCost')}</p>
+          <TooltipProvider>
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger
+                className={clsx(classes.font14Bold, classes.tooltipTrigger)}
+              >
+                {t('overview.estimatedCost')}
+              </TooltipTrigger>
+              <TooltipContent sideOffset={5} className="w-[320px]">
+                <p className="font-[600] mb-[6px]">
+                  {t('overview.unitPrice.title', {
+                    plan: t(`pricingPlan.${pricingPlan}`),
+                  })}
+                </p>
+                <div className="flex flex-col gap-[2px]">
+                  {unitPriceRows.map(row => (
+                    <div
+                      className="flex items-center justify-between gap-[12px]"
+                      key={row.key}
+                    >
+                      <span>{t(`overview.unitPrice.${row.key}`)}</span>
+                      <span className="whitespace-nowrap">
+                        ¥{row.price} / {row.unit}
+                        <span className="opacity-70">
+                          {' '}
+                          · {formatCny(row.subtotal)}
+                        </span>
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <TooltipArrow />
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <p className={clsx('text-blue1', classes.font16Bold)}>
             {localFormatOutOfCalData({
               data: formatCny(monthlyCost.total),

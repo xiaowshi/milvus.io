@@ -41,7 +41,15 @@
     "rawTooltip": "Die Größe der Originaldaten, die durch die Anzahl der Vektoren, die Vektordimension und die Größe der skalaren Felder bestimmt wird.",
     "memory": "Ladespeicher: ",
     "memoryTooltip": "Speicherverbrauch für Abfrageknoten, der durch die Rohdatengröße, den Indextyp und die Parameter für Abfrageknoten bestimmt wird.",
-    "estimatedCost": "Geschätzte Gesamtkosten pro Monat"
+    "estimatedCost": "Geschätzte Gesamtkosten pro Monat",
+    "unitPrice": {
+      "title": "Stückpreise {{plan}} (CNY / Monat)",
+      "milvusCpu": "Milvus CPU",
+      "milvusMemory": "Milvus Arbeitsspeicher",
+      "milvusStorage": "Milvus Speicher (Local PVC)",
+      "s3Disk": "S3 Disk",
+      "kafkaStorage": "Kafka Speicher"
+    }
   },
   "setup": {
     "title": "Ressourcenanforderungen einrichten",

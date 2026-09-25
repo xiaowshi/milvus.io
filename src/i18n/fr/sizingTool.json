@@ -41,7 +41,15 @@
     "rawTooltip": "La taille des données d'origine qui est déterminée par le nombre de vecteurs, la dimension du vecteur et la taille des données du champ scalaire.",
     "memory": "Mémoire de chargement : ",
     "memoryTooltip": "Consommation de mémoire pour les nœuds de requête qui est déterminée par la taille des données brutes, le type d'index et les paramètres pour les nœuds de requête.",
-    "estimatedCost": "Coût total estimé par mois"
+    "estimatedCost": "Coût total estimé par mois",
+    "unitPrice": {
+      "title": "Prix unitaires {{plan}} (CNY / mois)",
+      "milvusCpu": "CPU Milvus",
+      "milvusMemory": "Mémoire Milvus",
+      "milvusStorage": "Stockage Milvus (Local PVC)",
+      "s3Disk": "S3 Disk",
+      "kafkaStorage": "Stockage Kafka"
+    }
   },
   "setup": {
     "title": "Configuration des besoins en ressources",

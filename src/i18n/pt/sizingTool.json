@@ -41,7 +41,15 @@
     "rawTooltip": "O tamanho dos dados brutos é determinado pelo número de vetores, dimensão do vetor e tamanho dos dados dos campos escalares.",
     "memory": "Memória de Carregamento: ",
     "memoryTooltip": "Consumo de memória dos nós de consulta, determinado pelo tamanho dos dados brutos, tipo de índice e parâmetros dos nós de consulta.",
-    "estimatedCost": "Custo total estimado por mês"
+    "estimatedCost": "Custo total estimado por mês",
+    "unitPrice": {
+      "title": "Preços unitários {{plan}} (CNY / mês)",
+      "milvusCpu": "CPU do Milvus",
+      "milvusMemory": "Memória do Milvus",
+      "milvusStorage": "Armazenamento do Milvus (Local PVC)",
+      "s3Disk": "S3 Disk",
+      "kafkaStorage": "Armazenamento do Kafka"
+    }
   },
   "setup": {
     "title": "Requisitos de Recursos de Configuração",

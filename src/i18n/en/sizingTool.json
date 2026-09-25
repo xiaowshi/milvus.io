@@ -44,7 +44,15 @@
     "rawTooltip": "The size of the original data which is determined by the number of vectors, vector dimension, and the scalar field data size.",
     "memory": "Loading Memory: ",
     "memoryTooltip": "Memory consumption for query nodes which is determined by the raw data size, index type, and params for query nodes.",
-    "estimatedCost": "Estimated total cost per month"
+    "estimatedCost": "Estimated total cost per month",
+    "unitPrice": {
+      "title": "{{plan}} unit prices (CNY / month)",
+      "milvusCpu": "Milvus CPU",
+      "milvusMemory": "Milvus Memory",
+      "milvusStorage": "Milvus Storage (Local PVC)",
+      "s3Disk": "S3 Disk",
+      "kafkaStorage": "Kafka Storage"
+    }
   },
   "setup": {
     "title": "Setup Resource Requirements",

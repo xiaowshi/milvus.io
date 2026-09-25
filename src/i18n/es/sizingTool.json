@@ -41,7 +41,15 @@
     "rawTooltip": "El tamaño de los datos originales que se determina por el número de vectores, la dimensión del vector y el tamaño de los datos del campo escalar.",
     "memory": "Memoria de Carga: ",
     "memoryTooltip": "Consumo de memoria para nodos de consulta que se determina por el tamaño de los datos crudos, el tipo de índice y los parámetros para nodos de consulta.",
-    "estimatedCost": "Coste total estimado por mes"
+    "estimatedCost": "Coste total estimado por mes",
+    "unitPrice": {
+      "title": "Precios unitarios de {{plan}} (CNY / mes)",
+      "milvusCpu": "CPU de Milvus",
+      "milvusMemory": "Memoria de Milvus",
+      "milvusStorage": "Almacenamiento de Milvus (Local PVC)",
+      "s3Disk": "S3 Disk",
+      "kafkaStorage": "Almacenamiento de Kafka"
+    }
   },
   "setup": {
     "title": "Configurar Requisitos de Recursos",

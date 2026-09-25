@@ -41,7 +41,15 @@
     "rawTooltip": "벡터 수, 벡터 차원 및 스칼라 필드 데이터 크기에 의해 결정되는 원본 데이터의 크기입니다.",
     "memory": "로딩 메모리: ",
     "memoryTooltip": "쿼리 노드의 메모리 소비량으로, 원시 데이터 크기, 인덱스 유형 및 쿼리 노드의 매개변수에 의해 결정됩니다.",
-    "estimatedCost": "월 예상 총 비용"
+    "estimatedCost": "월 예상 총 비용",
+    "unitPrice": {
+      "title": "{{plan}} 단가 (CNY / 월)",
+      "milvusCpu": "Milvus CPU",
+      "milvusMemory": "Milvus 메모리",
+      "milvusStorage": "Milvus 스토리지 (Local PVC)",
+      "s3Disk": "S3 Disk",
+      "kafkaStorage": "Kafka 스토리지"
+    }
   },
   "setup": {
     "title": "리소스 요구 사항 설정",

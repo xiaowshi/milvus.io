@@ -41,7 +41,15 @@
     "rawTooltip": "原始数据的大小由向量数量、向量维度和标量字段数据大小决定。",
     "memory": "加载内存：",
     "memoryTooltip": "查询节点的内存消耗由原始数据大小、索引类型和查询节点的参数决定。",
-    "estimatedCost": "预估每月总费用"
+    "estimatedCost": "预估每月总费用",
+    "unitPrice": {
+      "title": "{{plan}}单价（元 / 月）",
+      "milvusCpu": "Milvus CPU",
+      "milvusMemory": "Milvus 内存",
+      "milvusStorage": "Milvus 存储（Local PVC）",
+      "s3Disk": "S3 Disk",
+      "kafkaStorage": "Kafka 存储"
+    }
   },
   "setup": {
     "title": "设置资源需求",

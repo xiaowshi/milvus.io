@@ -41,7 +41,15 @@
     "rawTooltip": "Ukuran data asli yang ditentukan oleh jumlah vektor, dimensi vektor, dan ukuran data bidang scalar.",
     "memory": "Memuat Memori: ",
     "memoryTooltip": "Konsumsi memori untuk node kueri yang ditentukan oleh ukuran data mentah, jenis indeks, dan parameter untuk node kueri.",
-    "estimatedCost": "Estimasi total biaya per bulan"
+    "estimatedCost": "Estimasi total biaya per bulan",
+    "unitPrice": {
+      "title": "Harga satuan {{plan}} (CNY / bulan)",
+      "milvusCpu": "CPU Milvus",
+      "milvusMemory": "Memori Milvus",
+      "milvusStorage": "Penyimpanan Milvus (Local PVC)",
+      "s3Disk": "S3 Disk",
+      "kafkaStorage": "Penyimpanan Kafka"
+    }
   },
   "setup": {
     "title": "Atur Kebutuhan Sumber Daya",
