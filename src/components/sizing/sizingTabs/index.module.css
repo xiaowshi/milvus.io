@@ -14,7 +14,7 @@
 }
 
 .tab {
-  padding: 9px 18px;
+  padding: 9px 22px;
   border-radius: 7px;
   border: 0;
   font-size: 14px;
@@ -25,12 +25,24 @@
   color: #667085;
   font-family: inherit;
   white-space: nowrap;
+
+  &:hover {
+    color: #0f172a;
+    background: rgba(255, 255, 255, 0.7);
+  }
 }
 
-.tabActive {
-  background: #ffffff;
-  color: #0f172a;
-  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.12);
+/* Selected tab is filled with the brand blue so the choice reads at a glance. */
+.tabActive,
+.tabActive:hover {
+  background: var(--color-blue1);
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 179, 255, 0.35);
+}
+
+.tabActive .tabBadge {
+  background: rgba(255, 255, 255, 0.9);
+  color: #0079b0;
 }
 
 .tabBadge {
