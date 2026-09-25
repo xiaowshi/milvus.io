@@ -43,7 +43,8 @@
     "raw": "Raw Data Size: ",
     "rawTooltip": "The size of the original data which is determined by the number of vectors, vector dimension, and the scalar field data size.",
     "memory": "Loading Memory: ",
-    "memoryTooltip": "Memory consumption for query nodes which is determined by the raw data size, index type, and params for query nodes."
+    "memoryTooltip": "Memory consumption for query nodes which is determined by the raw data size, index type, and params for query nodes.",
+    "estimatedCost": "Estimated total cost per month"
   },
   "setup": {
     "title": "Setup Resource Requirements",

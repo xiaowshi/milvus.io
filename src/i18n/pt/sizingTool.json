@@ -40,7 +40,8 @@
     "raw": "Tamanho dos Dados Brutos: ",
     "rawTooltip": "O tamanho dos dados brutos é determinado pelo número de vetores, dimensão do vetor e tamanho dos dados dos campos escalares.",
     "memory": "Memória de Carregamento: ",
-    "memoryTooltip": "Consumo de memória dos nós de consulta, determinado pelo tamanho dos dados brutos, tipo de índice e parâmetros dos nós de consulta."
+    "memoryTooltip": "Consumo de memória dos nós de consulta, determinado pelo tamanho dos dados brutos, tipo de índice e parâmetros dos nós de consulta.",
+    "estimatedCost": "Custo total estimado por mês"
   },
   "setup": {
     "title": "Requisitos de Recursos de Configuração",

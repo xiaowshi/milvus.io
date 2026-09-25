@@ -23,7 +23,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import CustomButton from '@/components/customButton';
 import { MilvusComponent } from './milvusComponent';
 import { checkIconTpl, copyIconTpl } from '@/components/icons';
-import { SizingVersionConfig } from './types';
+import { SizingVersionConfig, PricingPlanEnum } from './types';
+import { estimateMonthlyCost, formatCny } from '@/utils/sizingCost';
 
 enum InstallTypeEnum {
   Docker = 'docker',
@@ -73,6 +74,7 @@ export default function ResultSection(props: ResultSectionProps) {
     dependencyConfig,
     mode,
     dependency,
+    pricingPlan = PricingPlanEnum.Shared,
     isOutOfCalculate,
   } = calculatedResult;
 
@@ -114,6 +116,24 @@ export default function ResultSection(props: ResultSectionProps) {
   );
 
   const { size: diskSize, unit: diskUnit } = unitBYTE2Any(localDiskSize);
+
+  // Estimated monthly cost (CNY). Milvus CPU/memory/local storage follow the
+  // selected pricing plan's pool; S3 disk and Kafka storage are billed on
+  // their own pools. ETCD and dependency CPU/memory are not billed.
+  const { minio: s3Config, kafka: kafkaConfig } = dependencyConfig;
+  const s3DiskGB = s3Config ? s3Config.pvc * s3Config.count : 0;
+  const kafkaStorageGB = kafkaConfig
+    ? kafkaConfig.broker.pvc * kafkaConfig.broker.count +
+      kafkaConfig.zookeeper.pvc * kafkaConfig.zookeeper.count
+    : 0;
+  const monthlyCost = estimateMonthlyCost({
+    plan: pricingPlan,
+    milvusCpuCores: milvusCpu,
+    milvusMemoryGiB: milvusMemory,
+    milvusStorageGB: localDiskSize / 1024 / 1024 / 1024,
+    s3DiskGB,
+    kafkaStorageGB,
+  });
 
   const [isMilvusOpen, setIsMilvusOpen] = useState(true);
   const [isDependencyOpen, setIsDependencyOpen] = useState(true);
@@ -344,6 +364,16 @@ sudo docker compose up -d`,
               })}
             </p>
           </div>
+        </div>
+
+        <div className="p-[20px] border-b border-solid border-black4 flex items-center justify-between gap-[20px]">
+          <p className={classes.font14Bold}>{t('overview.estimatedCost')}</p>
+          <p className={clsx('text-blue1', classes.font16Bold)}>
+            {localFormatOutOfCalData({
+              data: formatCny(monthlyCost.total),
+              isOut: isOutOfCalculate,
+            })}
+          </p>
         </div>
 
         <div className="p-[20px] pb-[0px]">
