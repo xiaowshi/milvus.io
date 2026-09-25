@@ -840,23 +840,13 @@ export const dependencyOverviewDataCalculator = (params: {
     minio.memory * minio.count +
     streamPlatformMemory;
 
-  const pulsarStorage = pulsar
-    ? (pulsar.bookie.journal + pulsar.bookie.ledgers) * pulsar.bookie.count +
-      pulsar.zookeeper.pvc * pulsar.zookeeper.count
-    : 0;
-
   const kafkaStorage = kafka
     ? kafka.broker.pvc * kafka.broker.count +
       kafka.zookeeper.pvc * kafka.zookeeper.count
     : 0;
 
-  const streamPlatformStorage =
-    dependency === DependencyComponentEnum.Pulsar
-      ? pulsarStorage
-      : kafkaStorage;
-
   const dependencyStorage =
-    etcd.pvc * etcd.count + minio.pvc * minio.count + streamPlatformStorage;
+    etcd.pvc * etcd.count + minio.pvc * minio.count + kafkaStorage;
 
   return {
     dependencyCpu,

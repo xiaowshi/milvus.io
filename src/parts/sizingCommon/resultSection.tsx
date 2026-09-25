@@ -101,10 +101,6 @@ export default function ResultSection(props: ResultSectionProps) {
   }
   const { dependencyCpu, dependencyMemory, dependencyStorage } =
     dependencyOverviewDataCalculator(dependencyOverviewParams);
-  const dependencyCpuData = formatNumber(dependencyCpu);
-  const dependencyMemoryData = unitBYTE2Any(
-    dependencyMemory * 1024 * 1024 * 1024
-  );
   const { size: dependencyStorageSize, unit: dependencyStorageUnit } =
     unitBYTE2Any(dependencyStorage * 1024 * 1024 * 1024);
 
@@ -438,25 +434,7 @@ sudo docker compose up -d`,
                   </p>
                   <div className="flex items-center gap-[12px]">
                     <p className={classes.commonKeyLabel}>
-                      {t('setup.basic.cpu')}:&nbsp;
-                      <span className="font-[600] text-[12px] leading-[18px] text-black1 inline-block w-[65px] text-left">
-                        {localFormatOutOfCalData({
-                          data: `${dependencyCpuData.num}${dependencyCpuData.unit} Core`,
-                          isOut: isOutOfCalculate,
-                        })}
-                      </span>
-                    </p>
-                    <p className={classes.commonKeyLabel}>
-                      {t('setup.basic.memory')}:&nbsp;
-                      <span className="font-[600] text-[12px] leading-[18px] text-black1 inline-block w-[65px] text-left">
-                        {localFormatOutOfCalData({
-                          data: `${dependencyMemoryData.size} ${dependencyMemoryData.unit}`,
-                          isOut: isOutOfCalculate,
-                        })}
-                      </span>
-                    </p>
-                    <p className={classes.commonKeyLabel}>
-                      {t('setup.basic.storage')}:&nbsp;
+                      {t('setup.basic.storage')} (ETCD / S3 / Kafka):&nbsp;
                       <span className="font-[600] text-[12px] leading-[18px] text-black1 inline-block w-[65px] text-left">
                         {localFormatOutOfCalData({
                           data: `${dependencyStorageSize} ${dependencyStorageUnit}`,
