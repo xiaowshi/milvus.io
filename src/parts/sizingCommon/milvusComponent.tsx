@@ -1,5 +1,5 @@
 import classes from './index.module.css';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import { DataCard } from './components';
 import {
   TooltipProvider,
@@ -56,19 +56,12 @@ export const MilvusComponent = (props: {
             memory: standaloneNodeConfig.memory,
           })}
           desc={
-            <Trans
-              t={t}
-              i18nKey="setup.basic.diskWithValue"
-              values={{
-                disk: `${diskSize} ${diskUnit}`,
-              }}
-              components={[
-                <span
-                  key="value"
-                  className="text-[12px] leading-[18px] font-[500] text-black1"
-                ></span>,
-              ]}
-            />
+            <div className="flex items-center">
+              Local PVC:&nbsp;
+              <span className="text-[12px] leading-[18px] font-[500] text-black1">
+                {diskSize} {diskUnit}
+              </span>
+            </div>
           }
         />
       ) : (
@@ -208,19 +201,12 @@ export const MilvusComponent = (props: {
             })}
             desc={
               isOutOfCalculate ? undefined : diskSize > 0 ? (
-                <Trans
-                  t={t}
-                  i18nKey="setup.basic.diskWithValue"
-                  values={{
-                    disk: `${diskSize} ${diskUnit}`,
-                  }}
-                  components={[
-                    <span
-                      className="text-[12px] leading-[18px] font-[500] text-black1"
-                      key="local-disk"
-                    ></span>,
-                  ]}
-                />
+                <div className="flex items-center">
+                  Local PVC:&nbsp;
+                  <span className="text-[12px] leading-[18px] font-[500] text-black1">
+                    {diskSize} {diskUnit}
+                  </span>
+                </div>
               ) : undefined
             }
             count={queryNode.count}

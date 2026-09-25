@@ -349,7 +349,7 @@ sudo docker compose up -d`,
           </div>
           <div className="flex-[1]">
             <p className={clsx('mb-[6px]', classes.font14Bold)}>
-              {t('setup.basic.disk')}
+              Local PVC
             </p>
             <p className={clsx('text-blue1', classes.font16Bold)}>
               {localFormatOutOfCalData({
@@ -400,22 +400,13 @@ sudo docker compose up -d`,
                       </span>
                     </p>
                     <p className={classes.commonKeyLabel}>
-                      <Trans
-                        t={t}
-                        i18nKey="setup.basic.diskWithValue"
-                        values={{
-                          disk: localFormatOutOfCalData({
-                            data: `${diskSize} ${diskUnit}`,
-                            isOut: isOutOfCalculate,
-                          }),
-                        }}
-                        components={[
-                          <span
-                            key="value"
-                            className="font-[600] text-[12px] leading-[18px] text-black1 inline-block w-[65px] text-left"
-                          ></span>,
-                        ]}
-                      />
+                      Local PVC:&nbsp;
+                      <span className="font-[600] text-[12px] leading-[18px] text-black1 inline-block w-[65px] text-left">
+                        {localFormatOutOfCalData({
+                          data: `${diskSize} ${diskUnit}`,
+                          isOut: isOutOfCalculate,
+                        })}
+                      </span>
                     </p>
                   </div>
                 </div>

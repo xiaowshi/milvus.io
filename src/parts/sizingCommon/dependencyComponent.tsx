@@ -346,24 +346,22 @@ export const DependencyComponent = (props: {
           isOutOfCalculate={isOutOfCalculate}
         />
         <DataCard
-          name={t('setup.dependency.minio')}
+          name="S3"
           data={t('setup.basic.config', {
             cpu: minio.cpu,
             memory: minio.memory,
           })}
           count={minio.count}
           desc={
-            <Trans
-              t={t}
-              i18nKey="setup.basic.pvc"
-              values={{
-                pvc: formatOutOfCalData({
+            <div className="flex items-center">
+              Disk:&nbsp;
+              <span className="text-black1 font-[500]">
+                {formatOutOfCalData({
                   data: `${minio.pvc} GB`,
                   isOut: isOutOfCalculate,
-                }),
-              }}
-              components={[<span key="pvc" className="text-black1"></span>]}
-            />
+                })}
+              </span>
+            </div>
           }
           classname={classes.card}
           isOutOfCalculate={isOutOfCalculate}
