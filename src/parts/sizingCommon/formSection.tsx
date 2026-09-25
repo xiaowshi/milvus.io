@@ -278,7 +278,7 @@ export default function FormSection(props: FormSectionProps) {
             </span>
             <a
               className="flex items-center gap-[4px] font-[400] text-[12px] leading-[16px] text-black1 hover:underline"
-              href="/docs/index.md?tab=floating"
+              href="https://milvus.io/docs/zh/index-explained.md"
               target="_blank"
             >
               {t('form.indexTypeTip')}
