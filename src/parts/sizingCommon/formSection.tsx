@@ -4,7 +4,6 @@ import {
   SizingInput,
   SizingRange,
   SizingSwitch,
-  ThreeOptionSwitch,
 } from '@/components/sizing';
 import {
   Collapsible,
@@ -23,9 +22,7 @@ import { IndexTypeComponent } from './indexTypeComponent';
 import { Trans, useTranslation } from 'react-i18next';
 import { TooltipArrow } from '@radix-ui/react-tooltip';
 import { ExternalLinkIcon } from '@/components/icons';
-import Link from 'next/link';
-import { SizingVersionConfig, DependencyOption } from './types';
-import { PulsarIcon, KafkaIcon, WoodpeckerIcon } from './components';
+import { SizingVersionConfig } from './types';
 
 interface FormSectionProps {
   className: string;
@@ -43,8 +40,6 @@ export default function FormSection(props: FormSectionProps) {
     DIMENSION_RANGE_CONFIG,
     SEGMENT_SIZE_OPTIONS,
     INDEX_TYPE_OPTIONS,
-    DEPENDENCY_COMPONENTS,
-    MODE_OPTIONS,
     N_LIST_RANGE_CONFIG,
     MAX_NODE_DEGREE_RANGE_CONFIG,
     M_RANGE_CONFIG,
@@ -62,22 +57,14 @@ export default function FormSection(props: FormSectionProps) {
   const {
     memoryAndDiskCalculator,
     rawDataSizeCalculator,
-    $10M768D,
-    $50M768D,
-    $500M768D,
-    $100M768D,
     $1B768D,
     dependencyCalculator,
     clusterNodesConfigCalculator,
     standaloneNodeConfigCalculator,
   } = config.utils;
 
-  const NORMAL_CHANGE_THRESHOLD = $10M768D;
-  const DISKANN_MODE_CHANGE_THRESHOLD = $50M768D;
-
   const collapseEle = useRef<HTMLDivElement | null>(null);
 
-  const [manuallySelectedMode, setManuallySelectedMode] = useState<any>(undefined);
   const [rawDataSize, setRawDataSize] = useState(0);
 
   const [refine, setRefine] = useState(
@@ -94,8 +81,9 @@ export default function FormSection(props: FormSectionProps) {
       offLoading: false,
     },
     segmentSize: SEGMENT_SIZE_OPTIONS[1].value,
-    dependency: DEPENDENCY_COMPONENTS[0].value,
-    mode: MODE_OPTIONS[0].value,
+    // Only the distributed / Kafka deployment is estimated.
+    dependency: DependencyComponentEnum.Kafka,
+    mode: ModeEnum.Cluster,
   });
 
   const initialIndexTypeParams = useMemo(() => {
@@ -115,12 +103,6 @@ export default function FormSection(props: FormSectionProps) {
   }, [config.supportsRabitq]);
 
   const [indexTypeParams, setIndexTypeParams] = useState(initialIndexTypeParams);
-
-  const modeChangeThreshold = useMemo(() => {
-    return indexTypeParams.indexType === IndexTypeEnum.DISKANN
-      ? DISKANN_MODE_CHANGE_THRESHOLD
-      : NORMAL_CHANGE_THRESHOLD;
-  }, [indexTypeParams.indexType]);
 
   const handleRefineChange = (value: any) => {
     setRefine(value);
@@ -177,47 +159,6 @@ export default function FormSection(props: FormSectionProps) {
     return SEGMENT_SIZE_OPTIONS.find((v: any) => v.value === form.segmentSize);
   }, [form.segmentSize]);
 
-  // Build dependency options with icons
-  const dependencyOptions: DependencyOption[] = useMemo(() => {
-    if (config.supportsWoodpecker) {
-      // v3: Use ThreeOptionSwitch, no need for icons array
-      return DEPENDENCY_COMPONENTS;
-    }
-    // v250: Build options with icons
-    return [
-      {
-        ...DEPENDENCY_COMPONENTS[0],
-        icon: <PulsarIcon />,
-      },
-      {
-        ...DEPENDENCY_COMPONENTS[1],
-        icon: <KafkaIcon />,
-      },
-    ];
-  }, [config.supportsWoodpecker, DEPENDENCY_COMPONENTS]);
-
-  const modeOptions = [
-    {
-      ...MODE_OPTIONS[0],
-      desc: t('form.standaloneDesc'),
-    },
-    {
-      ...MODE_OPTIONS[1],
-      desc: t('form.clusterDesc'),
-    },
-  ];
-
-  // Check if should show Apache component (Pulsar/Kafka)
-  const showApacheComponent = useMemo(() => {
-    if (!config.supportsWoodpecker) {
-      return form.mode === ModeEnum.Cluster;
-    }
-    return (
-      form.mode === ModeEnum.Cluster &&
-      form.dependency !== DependencyComponentEnum?.Woodpecker
-    );
-  }, [form.mode, form.dependency, config.supportsWoodpecker, ModeEnum, DependencyComponentEnum]);
-
   useEffect(() => {
     if (form.widthScalar === false) {
       setForm({
@@ -245,20 +186,6 @@ export default function FormSection(props: FormSectionProps) {
     form.widthScalar,
     form.scalarData.averageNum,
   ]);
-
-  useEffect(() => {
-    let mode =
-      rawDataSize > modeChangeThreshold
-        ? ModeEnum.Cluster
-        : ModeEnum.Standalone;
-    if (manuallySelectedMode === ModeEnum.Cluster) {
-      mode = ModeEnum.Cluster;
-    }
-    setForm({
-      ...form,
-      mode: manuallySelectedMode || mode,
-    });
-  }, [rawDataSize, modeChangeThreshold]);
 
   useEffect(() => {
     const currentMode = form.mode;
@@ -318,14 +245,6 @@ export default function FormSection(props: FormSectionProps) {
       isOutOfCalculate: disableCalculationThreshold ? false : rawDataSize > $1B768D,
     });
   }, [form, indexTypeParams, refine]);
-
-  const disableStandalone = useMemo(() => {
-    const disableThreshold =
-      indexTypeParams.indexType === IndexTypeEnum.DISKANN
-        ? $500M768D
-        : $100M768D;
-    return rawDataSize > disableThreshold;
-  }, [rawDataSize, indexTypeParams.indexType]);
 
   return (
     <section className={clsx(className, classes.formSection)}>
@@ -499,140 +418,6 @@ export default function FormSection(props: FormSectionProps) {
             </SelectContent>
           </Select>
         </div>
-
-        <div className="mb-[24px]">
-          <h4 className="">
-            <TooltipProvider>
-              <Tooltip delayDuration={0}>
-                <TooltipTrigger
-                  className={clsx(
-                    'text-[14px] font-[600] leading-[22px] mb-[8px]',
-                    classes.tooltipTrigger
-                  )}
-                >
-                  {t('form.mode')}
-                </TooltipTrigger>
-                <TooltipContent className="w-[280px]">
-                  <Trans
-                    t={t}
-                    i18nKey="form.modeTip"
-                    components={[
-                      <a
-                        href="/docs/multi-storage-backup-and-restore.md"
-                        key="mode-tip"
-                        className={classes.tooltipLink}
-                      ></a>,
-                    ]}
-                  />
-                  <TooltipArrow />
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </h4>
-          <div className={classes.cardsWrapper}>
-            <div
-              role="button"
-              className={clsx(classes.card, classes.modeCard, {
-                [classes.activeCard]: form.mode === modeOptions[0].value,
-                [classes.disabledCard]: disableStandalone,
-              })}
-              onClick={() => {
-                if (disableStandalone) {
-                  return;
-                }
-                setManuallySelectedMode(modeOptions[0].value);
-                handleFormChange('mode', modeOptions[0].value);
-              }}
-            >
-              <h5 className="text-[14px] font-[600] leading-[22px]">
-                {modeOptions[0].label}
-              </h5>
-              <span className="text-[12px] font-[400] leading-[16px]">
-                {modeOptions[0].desc}
-              </span>
-
-              <TooltipProvider>
-                <Tooltip delayDuration={0}>
-                  <TooltipContent className="w-[280px]" side="bottom">
-                    {t('form.modeDisableTip')}
-                    <TooltipArrow />
-                  </TooltipContent>
-                  <TooltipTrigger>
-                    <div className={classes.mask}></div>
-                  </TooltipTrigger>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-            <div
-              className={clsx(classes.card, classes.modeCard, {
-                [classes.activeCard]: form.mode === modeOptions[1].value,
-              })}
-              onClick={() => {
-                setManuallySelectedMode(modeOptions[1].value);
-                handleFormChange('mode', modeOptions[1].value);
-              }}
-            >
-              <h5 className="text-[14px] font-[600] leading-[22px]">
-                {modeOptions[1].label}
-              </h5>
-              <span className="text-[12px] font-[400] leading-[16px]">
-                {modeOptions[1].desc}
-              </span>
-            </div>
-          </div>
-        </div>
-        {form.mode === ModeEnum.Cluster && (
-          <div>
-            <h4 className="text-[14px] font-[600] leading-[22px] mb-[8px]">
-              {t('form.dependencyComp')}
-            </h4>
-            <div className={classes.cardsWrapper}>
-              {config.supportsWoodpecker ? (
-                <ThreeOptionSwitch
-                  options={DEPENDENCY_COMPONENTS}
-                  value={form.dependency}
-                  onChange={(value: string) => {
-                    handleFormChange('dependency', value);
-                  }}
-                />
-              ) : (
-                dependencyOptions.map(v => (
-                  <button
-                    className={clsx(classes.card, classes.dependencyCard, {
-                      [classes.activeCard]: form.dependency === v.value,
-                    })}
-                    onClick={() => {
-                      handleFormChange('dependency', v.value);
-                    }}
-                    key={v.label}
-                  >
-                    {v.icon}
-                    <span className="text-[14px] font-[600] leading-[22px]">
-                      {v.label}
-                    </span>
-                  </button>
-                ))
-              )}
-            </div>
-          </div>
-        )}
-
-        {config.supportsWoodpecker &&
-          form.dependency === DependencyComponentEnum?.Woodpecker && (
-            <p className="mt-[36px] text-[12px]  leading-[18px] text-black2">
-              <Trans
-                t={t}
-                i18nKey="woodpeckerTip"
-                components={[
-                  <Link
-                    key="link"
-                    className="font-[600] text-[#00b3ff] hover:underline"
-                    href="/docs/woodpecker_architecture.md#Woodpecker"
-                  ></Link>,
-                ]}
-              />
-            </p>
-          )}
 
         <p className="mt-[36px] text-[12px]  leading-[18px] text-black2">
           <Trans

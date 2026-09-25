@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import classes from '@/styles/sizingTool.module.css';
 import pageClasses from '@/styles/responsive.module.css';
@@ -23,8 +23,6 @@ import {
 import { useRouter } from 'next/router';
 import { SIZING_TOOL_VERSION_OPTIONS } from '@/consts/sizing';
 import { baseValues } from '@/parts/sizing/config';
-import { SizingTabs, sizingTabId, sizingTabPanelId } from '@/components/sizing';
-import { GpuSizingTool } from '@/parts/sizingGpu';
 import { LanguageSelector } from '@/components/language-selector';
 import { useGlobalLocale } from '@/hooks/use-global-locale';
 const { etcdBaseValue, minioBaseValue, pulsarBaseValue, kafkaBaseValue } =
@@ -33,18 +31,6 @@ const { etcdBaseValue, minioBaseValue, pulsarBaseValue, kafkaBaseValue } =
 type Props = {
   locale: LanguageEnum;
   latestTag: string;
-};
-
-enum SizingTabEnum {
-  Cpu = 'cpu',
-  Gpu = 'gpu',
-}
-
-const TAB_ID_PREFIX = 'sizing';
-
-const readTabFromQuery = (value: string | string[] | undefined) => {
-  const raw = Array.isArray(value) ? value[0] : value;
-  return raw === SizingTabEnum.Gpu ? SizingTabEnum.Gpu : SizingTabEnum.Cpu;
 };
 
 export default function SizingTool(props: Props) {
@@ -110,43 +96,13 @@ export default function SizingTool(props: Props) {
         ...kafkaBaseValue,
       },
     },
-    mode: ModeEnum.Standalone,
-    dependency: DependencyComponentEnum.Pulsar,
+    mode: ModeEnum.Cluster,
+    dependency: DependencyComponentEnum.Kafka,
     isOutOfCalculate: false,
   });
 
   const [selectedVersion, setSelectedVersion] = useState<string>(
     currentVersion?.value || SIZING_TOOL_VERSION_OPTIONS[0].value
-  );
-
-  // Defaults to CPU; `?tab=gpu` selects the GPU calculator so the view is
-  // linkable. Both panels stay mounted so each keeps its own form state.
-  const [tab, setTab] = useState<SizingTabEnum>(SizingTabEnum.Cpu);
-
-  useEffect(() => {
-    if (!router.isReady) {
-      return;
-    }
-    setTab(readTabFromQuery(router.query.tab));
-  }, [router.isReady, router.query.tab]);
-
-  const handleTabChange = useCallback(
-    (value: SizingTabEnum) => {
-      setTab(value);
-
-      const query = { ...router.query };
-      if (value === SizingTabEnum.Gpu) {
-        query.tab = SizingTabEnum.Gpu;
-      } else {
-        delete query.tab;
-      }
-
-      router.replace({ pathname: router.pathname, query }, undefined, {
-        shallow: true,
-        scroll: false,
-      });
-    },
-    [router]
   );
 
   const asyncCalculatedResult = (result: ICalculateResult) => {
@@ -206,60 +162,18 @@ export default function SizingTool(props: Props) {
           </div>
         </div>
 
-        <p className={clsx(classes.desc, classes.descWithTabs)}>
-          {t('content')}
-        </p>
+        <p className={classes.desc}>{t('content')}</p>
 
-        <SizingTabs
-          className={classes.tabsRow}
-          idPrefix={TAB_ID_PREFIX}
-          value={tab}
-          onChange={handleTabChange}
-          hint={
-            tab === SizingTabEnum.Gpu ? t('tabs.gpuHint') : t('tabs.cpuHint')
-          }
-          options={[
-            { value: SizingTabEnum.Cpu, label: t('tabs.cpu') },
-            {
-              value: SizingTabEnum.Gpu,
-              label: t('tabs.gpu'),
-              badge: t('tabs.new'),
-            },
-          ]}
-        />
-
-        <div
-          role="tabpanel"
-          id={sizingTabPanelId(TAB_ID_PREFIX, SizingTabEnum.Cpu)}
-          aria-labelledby={sizingTabId(TAB_ID_PREFIX, SizingTabEnum.Cpu)}
-          hidden={tab !== SizingTabEnum.Cpu}
-          className={clsx({
-            [classes.hiddenPanel]: tab !== SizingTabEnum.Cpu,
-          })}
-        >
-          <div className={classes.contentContainer}>
-            <FormSection
-              className={classes.leftSection}
-              asyncCalculatedResult={asyncCalculatedResult}
-            />
-            <ResultSection
-              className={classes.rightSection}
-              calculatedResult={calculatedResult}
-              latestMilvusTag={latestTag}
-            />
-          </div>
-        </div>
-
-        <div
-          role="tabpanel"
-          id={sizingTabPanelId(TAB_ID_PREFIX, SizingTabEnum.Gpu)}
-          aria-labelledby={sizingTabId(TAB_ID_PREFIX, SizingTabEnum.Gpu)}
-          hidden={tab !== SizingTabEnum.Gpu}
-          className={clsx({
-            [classes.hiddenPanel]: tab !== SizingTabEnum.Gpu,
-          })}
-        >
-          <GpuSizingTool />
+        <div className={classes.contentContainer}>
+          <FormSection
+            className={classes.leftSection}
+            asyncCalculatedResult={asyncCalculatedResult}
+          />
+          <ResultSection
+            className={classes.rightSection}
+            calculatedResult={calculatedResult}
+            latestMilvusTag={latestTag}
+          />
         </div>
       </div>
     </main>

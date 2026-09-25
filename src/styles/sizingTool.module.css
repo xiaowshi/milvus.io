@@ -81,20 +81,6 @@
     }
   }
 
-  /* The tab switcher sits directly under the subtitle, so the airy 80px gap
-     below `.desc` moves to the bottom of the switcher block instead. */
-  .descWithTabs {
-    margin-bottom: 26px;
-  }
-
-  .tabsRow {
-    margin-bottom: 24px;
-  }
-
-  .hiddenPanel {
-    display: none;
-  }
-
   .tipWrapper {
     display: flex;
     align-items: flex-start;

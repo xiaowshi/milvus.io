@@ -96,8 +96,8 @@ export default function SizingTool(props: Props) {
         ...kafkaBaseValue,
       },
     },
-    mode: ModeEnum.Standalone,
-    dependency: DependencyComponentEnum.Pulsar,
+    mode: ModeEnum.Cluster,
+    dependency: DependencyComponentEnum.Kafka,
     isOutOfCalculate: false,
   });
 
