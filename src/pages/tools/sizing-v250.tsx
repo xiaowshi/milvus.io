@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import React, { useEffect, useMemo, useState } from 'react';
+import i18next from 'i18next';
+import { I18nextProvider, useTranslation } from 'react-i18next';
 import classes from '@/styles/sizingTool.module.css';
 import pageClasses from '@/styles/responsive.module.css';
 import clsx from 'clsx';
@@ -37,6 +38,13 @@ type Props = {
 export default function SizingTool(props: Props) {
   const { locale = LanguageEnum.ENGLISH, latestTag } = props;
   const { t } = useTranslation('sizingTool', { lng: locale });
+  // The shared sizing components call useTranslation() without a language, so
+  // give them an instance pinned to this page's locale. Otherwise the server
+  // renders them in English and hydration on /<lang>/tools/sizing fails.
+  const sizingI18n = useMemo(
+    () => i18next.cloneInstance({ lng: locale, initImmediate: false }),
+    [locale]
+  );
   const router = useRouter();
   const {
     locale: activeLocale,
@@ -128,85 +136,87 @@ export default function SizingTool(props: Props) {
   };
 
   return (
-    <main className={classes.pageContainer}>
-      <Head>
-        <title>Estimate Your Cost</title>
-        <meta name="description" content="Sizing tool v2.5.x" />
-      </Head>
+    <I18nextProvider i18n={sizingI18n}>
+      <main className={classes.pageContainer}>
+        <Head>
+          <title>Estimate Your Cost</title>
+          <meta name="description" content="Sizing tool v2.5.x" />
+        </Head>
 
-      <div
-        className={clsx(
-          pageClasses.homeContainer,
-          classes.sizingToolContainer
-        )}
-      >
-        <div className={classes.titleContainer}>
-          <h1 className={classes.title}>Estimate Your Cost</h1>
-          <div className={classes.selectContainer}>
-            <LanguageSelector
-              value={activeLocale}
-              onChange={onLocaleChange}
-              disabled={languageSelectorDisabled}
-              disabledLanguages={disabledLanguages}
-              className={classes.languageSelector}
-            />
-            <div className={classes.versionSelector}>
-              <Select
-                value={selectedVersion}
-                onValueChange={handleSelectVersion}
-              >
-                <SelectTrigger className={classes.selectTrigger}>
-                  <SelectValue placeholder="Select a Milvus version">
-                    {selectedVersion}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {SIZING_TOOL_VERSION_OPTIONS.map(option => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+        <div
+          className={clsx(
+            pageClasses.homeContainer,
+            classes.sizingToolContainer
+          )}
+        >
+          <div className={classes.titleContainer}>
+            <h1 className={classes.title}>Estimate Your Cost</h1>
+            <div className={classes.selectContainer}>
+              <LanguageSelector
+                value={activeLocale}
+                onChange={onLocaleChange}
+                disabled={languageSelectorDisabled}
+                disabledLanguages={disabledLanguages}
+                className={classes.languageSelector}
+              />
+              <div className={classes.versionSelector}>
+                <Select
+                  value={selectedVersion}
+                  onValueChange={handleSelectVersion}
+                >
+                  <SelectTrigger className={classes.selectTrigger}>
+                    <SelectValue placeholder="Select a Milvus version">
+                      {selectedVersion}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SIZING_TOOL_VERSION_OPTIONS.map(option => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
-        </div>
-        <p className={clsx(classes.desc, classes.descWithTabs)}>
-          {t('content')}
-        </p>
+          <p className={clsx(classes.desc, classes.descWithTabs)}>
+            {t('content')}
+          </p>
 
-        <SizingTabs<PricingPlanEnum>
-          className={classes.tabsRow}
-          idPrefix="pricing-plan"
-          value={pricingPlan}
-          onChange={setPricingPlan}
-          hint={
-            pricingPlan === PricingPlanEnum.Shared
-              ? t('pricingPlan.sharedHint')
-              : t('pricingPlan.dedicatedHint')
-          }
-          options={[
-            { value: PricingPlanEnum.Shared, label: t('pricingPlan.shared') },
-            {
-              value: PricingPlanEnum.Dedicated,
-              label: t('pricingPlan.dedicated'),
-            },
-          ]}
-        />
+          <SizingTabs<PricingPlanEnum>
+            className={classes.tabsRow}
+            idPrefix="pricing-plan"
+            value={pricingPlan}
+            onChange={setPricingPlan}
+            hint={
+              pricingPlan === PricingPlanEnum.Shared
+                ? t('pricingPlan.sharedHint')
+                : t('pricingPlan.dedicatedHint')
+            }
+            options={[
+              { value: PricingPlanEnum.Shared, label: t('pricingPlan.shared') },
+              {
+                value: PricingPlanEnum.Dedicated,
+                label: t('pricingPlan.dedicated'),
+              },
+            ]}
+          />
 
-        <div className={classes.contentContainer}>
-          <FormSection
-            className={classes.leftSection}
-            updateCalculatedResult={updateCalculatedResult}
-          />
-          <ResultSection
-            className={classes.rightSection}
-            calculatedResult={calculatedResult}
-            latestMilvusTag={latestTag}
-          />
+          <div className={classes.contentContainer}>
+            <FormSection
+              className={classes.leftSection}
+              updateCalculatedResult={updateCalculatedResult}
+            />
+            <ResultSection
+              className={classes.rightSection}
+              calculatedResult={calculatedResult}
+              latestMilvusTag={latestTag}
+            />
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </I18nextProvider>
   );
 }
 
