@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import classes from './index.module.css';
 import {
-  SizingInput,
   SizingRange,
   SizingSwitch,
 } from '@/components/sizing';
@@ -23,6 +22,8 @@ import { Trans, useTranslation } from 'react-i18next';
 import { TooltipArrow } from '@radix-ui/react-tooltip';
 import { ExternalLinkIcon } from '@/components/icons';
 import { SizingVersionConfig } from './types';
+import { SchemaFields } from './schemaFields';
+import { SchemaField, defaultSchemaFields, schemaBytesPerRow } from './schema';
 
 interface FormSectionProps {
   className: string;
@@ -43,7 +44,6 @@ export default function FormSection(props: FormSectionProps) {
     N_LIST_RANGE_CONFIG,
     MAX_NODE_DEGREE_RANGE_CONFIG,
     M_RANGE_CONFIG,
-    MAXIMUM_AVERAGE_LENGTH,
     REFINE_OPTIONS,
   } = config.consts;
 
@@ -76,8 +76,7 @@ export default function FormSection(props: FormSectionProps) {
     dimension: DIMENSION_RANGE_CONFIG.defaultValue,
     widthScalar: false,
     scalarData: {
-      averageNum: 0,
-      averageString: '',
+      fields: defaultSchemaFields() as SchemaField[],
       offLoading: false,
     },
     segmentSize: SEGMENT_SIZE_OPTIONS[1].value,
@@ -122,28 +121,22 @@ export default function FormSection(props: FormSectionProps) {
     });
   };
 
-  const handleAverageLengthChange = (e: any) => {
-    let lengthString = e.target.value;
-    let lengthNum = Number(lengthString);
-    if (Number.isNaN(lengthNum) && lengthString !== '') {
-      return;
-    }
-    if (lengthString === '') {
-      lengthNum = 0;
-    }
-
-    if (Number(lengthString) > MAXIMUM_AVERAGE_LENGTH) {
-      lengthString = `${MAXIMUM_AVERAGE_LENGTH}`;
-    }
+  const handleSchemaChange = (fields: SchemaField[]) => {
     setForm({
       ...form,
       scalarData: {
         ...form.scalarData,
-        averageNum: lengthNum,
-        averageString: lengthString,
+        fields,
       },
     });
   };
+
+  // Average scalar bytes per row, derived from the field table.
+  const scalarAvg = useMemo(
+    () =>
+      form.widthScalar ? schemaBytesPerRow(form.scalarData.fields) : 0,
+    [form.widthScalar, form.scalarData.fields]
+  );
 
   const handleOffLoadingChange = (value: boolean) => {
     setForm({
@@ -164,8 +157,7 @@ export default function FormSection(props: FormSectionProps) {
       setForm({
         ...form,
         scalarData: {
-          averageString: '',
-          averageNum: 0,
+          fields: defaultSchemaFields(),
           offLoading: false,
         },
       });
@@ -177,14 +169,14 @@ export default function FormSection(props: FormSectionProps) {
       num: form.vector,
       d: form.dimension,
       withScalar: form.widthScalar,
-      scalarAvg: form.scalarData.averageNum,
+      scalarAvg,
     });
     setRawDataSize(rawDataSize);
   }, [
     form.vector,
     form.dimension,
     form.widthScalar,
-    form.scalarData.averageNum,
+    scalarAvg,
   ]);
 
   useEffect(() => {
@@ -197,7 +189,7 @@ export default function FormSection(props: FormSectionProps) {
       num: form.vector,
       withScalar: form.widthScalar,
       offLoading: form.scalarData.offLoading,
-      scalarAvg: form.scalarData.averageNum,
+      scalarAvg,
       segSize: Number(form.segmentSize),
       mode: currentMode,
     };
@@ -221,7 +213,7 @@ export default function FormSection(props: FormSectionProps) {
       num: form.vector,
       d: form.dimension,
       withScalar: form.widthScalar,
-      scalarAvg: form.scalarData.averageNum,
+      scalarAvg,
       mode: currentMode,
       loadingMemory: memory,
     };
@@ -244,7 +236,7 @@ export default function FormSection(props: FormSectionProps) {
       dependency: form.dependency,
       isOutOfCalculate: disableCalculationThreshold ? false : rawDataSize > $1B768D,
     });
-  }, [form, indexTypeParams, refine]);
+  }, [form, indexTypeParams, refine, rawDataSize]);
 
   return (
     <section className={clsx(className, classes.formSection)}>
@@ -336,17 +328,9 @@ export default function FormSection(props: FormSectionProps) {
             })}
           >
             <div className="" ref={collapseEle}>
-              <SizingInput
-                label={t('form.averageLength')}
-                unit={t('setup.basic.byte')}
-                value={form.scalarData.averageString}
-                onChange={handleAverageLengthChange}
-                fullWidth
-                classes={{
-                  root: classes.marginBtm20,
-                  label: classes.averageLabel,
-                }}
-                placeholder="[ 0, 60,000,000 ]"
+              <SchemaFields
+                fields={form.scalarData.fields}
+                onChange={handleSchemaChange}
               />
               <div>
                 <div className="flex items-center gap-[8px] mb-[8px]">

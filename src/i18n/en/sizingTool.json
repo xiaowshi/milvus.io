@@ -34,7 +34,16 @@
     "cluster": "Distributed",
     "clusterDesc": "Suitable for large scale.",
     "refine": "Refine",
-    "refineType": "Refine Type"
+    "refineType": "Refine Type",
+    "schema": {
+      "field": "Field",
+      "add": "Add Field",
+      "remove": "Remove field",
+      "pk": "PK",
+      "averageLength": "Average Length",
+      "averageCapacity": "Average Capacity",
+      "elementType": "Element Type"
+    }
   },
   "overview": {
     "title": "Resource Requirements",

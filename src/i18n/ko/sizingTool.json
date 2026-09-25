@@ -31,7 +31,16 @@
     "segmentTooltip": "datacoord.segment.maxSize는 Milvus에서 중요한 스토리지 구성 매개변수입니다. 이 매개변수는 Milvus의 물리적 저장 단위인 단일 세그먼트의 크기를 정의합니다. 이 값을 높이면 쿼리 성능이 향상될 수 있지만 리소스도 더 많이 소모됩니다. <0>자세히 보기.</0>",
     "refine": "수정",
     "refineType": "유형 세분화",
-    "inlinePq": "inline_pq"
+    "inlinePq": "inline_pq",
+    "schema": {
+      "field": "필드",
+      "add": "필드 추가",
+      "remove": "필드 삭제",
+      "pk": "PK",
+      "averageLength": "평균 길이",
+      "averageCapacity": "평균 요소 수",
+      "elementType": "요소 타입"
+    }
   },
   "overview": {
     "title": "리소스 요구 사항",

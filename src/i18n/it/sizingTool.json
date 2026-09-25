@@ -31,7 +31,16 @@
     "segmentTooltip": "datacoord.segment.maxSize è un importante parametro di configurazione della memorizzazione in Milvus. Definisce la dimensione di un singolo segmento, che è l'unità fisica di archiviazione di Milvus. L'aumento di questo valore può migliorare le prestazioni delle query, ma consuma anche più risorse. <0>Per saperne di più.</0>",
     "refine": "Raffinare",
     "refineType": "Raffinare il tipo",
-    "inlinePq": "inline_pq"
+    "inlinePq": "inline_pq",
+    "schema": {
+      "field": "Campo",
+      "add": "Aggiungi campo",
+      "remove": "Rimuovi campo",
+      "pk": "PK",
+      "averageLength": "Lunghezza media",
+      "averageCapacity": "Capacità media",
+      "elementType": "Tipo di elemento"
+    }
   },
   "overview": {
     "title": "Requisiti di Risorse",

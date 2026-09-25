@@ -119,6 +119,121 @@ div.averageLabel {
     }
   }
 
+  .schemaTable {
+    margin-bottom: 20px;
+  }
+
+  .schemaHeader {
+    font-size: 12px;
+    line-height: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .schemaList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .schemaRow {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .schemaTypeCell {
+    flex: 0 0 150px;
+  }
+
+  .schemaParamCell {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .schemaInput {
+    flex: 1;
+    min-width: 120px;
+  }
+
+  .schemaInputLabel {
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 500;
+    margin-bottom: 4px;
+    color: var(--color-black1);
+  }
+
+  .schemaSelectTrigger {
+    width: 100%;
+    height: 32px;
+    padding: 0 12px;
+    font-size: 12px;
+    line-height: 16px;
+  }
+
+  .schemaTypeLabel {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .pkTag {
+    font-size: 10px;
+    line-height: 14px;
+    font-weight: 600;
+    padding: 0 4px;
+    border-radius: 4px;
+    color: #fff;
+    background: var(--color-blue1);
+  }
+
+  .schemaDeleteBtn {
+    flex: 0 0 24px;
+    width: 24px;
+    height: 24px;
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    color: var(--color-black2);
+    transition: color 0.15s, background 0.15s;
+
+    &:hover {
+      color: #d92d20;
+      background: #fef3f2;
+    }
+
+    &:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+      color: var(--color-black2);
+      background: transparent;
+    }
+  }
+
+  .addFieldBtn {
+    margin-top: 8px;
+    font-size: 12px;
+    line-height: 18px;
+    font-weight: 600;
+    color: var(--color-blue1);
+
+    &:hover {
+      text-decoration: underline;
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      text-decoration: none;
+    }
+  }
+
   .switchRow {
     margin-bottom: 20px;
   }
