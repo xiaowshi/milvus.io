@@ -11,7 +11,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui';
-import { ExternalLinkIcon } from '@/components/icons';
 import { DataCard } from '@/parts/sizingCommon';
 import commonClasses from '@/parts/sizingCommon/index.module.css';
 import classes from './index.module.css';
@@ -23,8 +22,6 @@ import {
   ModeEnum,
   NodesValueType,
 } from '@/types/sizingGpu';
-
-const CLOUD_CALCULATOR_LINK = 'https://zilliz.com/pricing#calculator';
 
 /** Same chevron the CPU result section uses for its collapsible sections. */
 const ArrowDown = () => (
@@ -147,18 +144,10 @@ export default function GpuResultSection(props: GpuResultSectionProps) {
         </div>
       )}
 
-      <h2 className="flex justify-between items-center gap-[24px] mb-[12px]">
+      <h2 className="mb-[12px]">
         <span className="font-[600] text-[14px] leading-[22px]">
           {t('overview.title')}
         </span>
-        <a
-          className="flex items-center gap-[4px] font-[400] text-[12px] leading-[18px] text-black1 hover:underline"
-          href={CLOUD_CALCULATOR_LINK}
-          target="_blank"
-        >
-          {t('overview.explore')}
-          <ExternalLinkIcon />
-        </a>
       </h2>
 
       <div className="bg-gary2 pt-[20px] pb-[20px] rounded-[12px] mb-[24px]">

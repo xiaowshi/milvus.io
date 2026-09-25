@@ -1,11 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
-import Layout from '@/components/layout/commonLayout';
+import { useTranslation } from 'react-i18next';
 import classes from '@/styles/sizingTool.module.css';
 import pageClasses from '@/styles/responsive.module.css';
 import clsx from 'clsx';
 import Head from 'next/head';
-import { ABSOLUTE_BASE_URL } from '@/consts';
 import FormSection from '@/parts/sizing/formSection';
 import ResultSection from '@/parts/sizing/resultSection';
 import {
@@ -13,16 +11,11 @@ import {
   ICalculateResult,
   ModeEnum,
 } from '@/types/sizing';
-import { InfoFilled } from '@/components/icons';
-import ZillizAdv from '@/parts/blogs/zillizAdv';
-import { CLOUD_SIGNUP_LINK } from '@/consts';
 import { LanguageEnum } from '@/types/localization';
 import { fetchMilvusReleases } from '@/http/milvus';
-import Link from 'next/link';
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -32,6 +25,8 @@ import { SIZING_TOOL_VERSION_OPTIONS } from '@/consts/sizing';
 import { baseValues } from '@/parts/sizing/config';
 import { SizingTabs, sizingTabId, sizingTabPanelId } from '@/components/sizing';
 import { GpuSizingTool } from '@/parts/sizingGpu';
+import { LanguageSelector } from '@/components/language-selector';
+import { useGlobalLocale } from '@/hooks/use-global-locale';
 const { etcdBaseValue, minioBaseValue, pulsarBaseValue, kafkaBaseValue } =
   baseValues;
 
@@ -56,6 +51,12 @@ export default function SizingTool(props: Props) {
   const { locale = LanguageEnum.ENGLISH, latestTag } = props;
   const { t } = useTranslation('sizingTool', { lng: locale });
   const router = useRouter();
+  const {
+    locale: activeLocale,
+    disabled: languageSelectorDisabled,
+    disabledLanguages,
+    onLocaleChange,
+  } = useGlobalLocale();
   const currentVersion = SIZING_TOOL_VERSION_OPTIONS.find(
     option => option.href === router.pathname
   );
@@ -162,31 +163,28 @@ export default function SizingTool(props: Props) {
 
   return (
     <main className={classes.pageContainer}>
-      <Layout darkMode={false}>
-        <Head>
-          <title>
-            Milvus Sizing Tool · Vector Database built for scalable similarity
-            search
-          </title>
-          <meta name="description" content="Sizing tool" />
-        </Head>
+      <Head>
+        <title>Estimate Your Cost</title>
+        <meta name="description" content="Sizing tool" />
+      </Head>
 
-        <div
-          className={clsx(
-            pageClasses.homeContainer,
-            classes.sizingToolContainer
-          )}
-        >
-          <div className={classes.titleContainer}>
-            <h1 className={classes.title}>
-              <Link
-                href="https://zilliz.com/blog/demystify-milvus-sizing-tool"
-                target="_blank"
-              >
-                {t('title')}
-              </Link>
-            </h1>
-            <div className={classes.selectContainer}>
+      <div
+        className={clsx(
+          pageClasses.homeContainer,
+          classes.sizingToolContainer
+        )}
+      >
+        <div className={classes.titleContainer}>
+          <h1 className={classes.title}>Estimate Your Cost</h1>
+          <div className={classes.selectContainer}>
+            <LanguageSelector
+              value={activeLocale}
+              onChange={onLocaleChange}
+              disabled={languageSelectorDisabled}
+              disabledLanguages={disabledLanguages}
+              className={classes.languageSelector}
+            />
+            <div className={classes.versionSelector}>
               <Select
                 value={selectedVersion}
                 onValueChange={handleSelectVersion}
@@ -206,69 +204,64 @@ export default function SizingTool(props: Props) {
               </Select>
             </div>
           </div>
-
-          <p className={clsx(classes.desc, classes.descWithTabs)}>
-            {t('content')}
-          </p>
-
-          <SizingTabs
-            className={classes.tabsRow}
-            idPrefix={TAB_ID_PREFIX}
-            value={tab}
-            onChange={handleTabChange}
-            hint={
-              tab === SizingTabEnum.Gpu ? t('tabs.gpuHint') : t('tabs.cpuHint')
-            }
-            options={[
-              { value: SizingTabEnum.Cpu, label: t('tabs.cpu') },
-              {
-                value: SizingTabEnum.Gpu,
-                label: t('tabs.gpu'),
-                badge: t('tabs.new'),
-              },
-            ]}
-          />
-
-          <div
-            role="tabpanel"
-            id={sizingTabPanelId(TAB_ID_PREFIX, SizingTabEnum.Cpu)}
-            aria-labelledby={sizingTabId(TAB_ID_PREFIX, SizingTabEnum.Cpu)}
-            hidden={tab !== SizingTabEnum.Cpu}
-            className={clsx({
-              [classes.hiddenPanel]: tab !== SizingTabEnum.Cpu,
-            })}
-          >
-            <div className={classes.contentContainer}>
-              <FormSection
-                className={classes.leftSection}
-                asyncCalculatedResult={asyncCalculatedResult}
-              />
-              <ResultSection
-                className={classes.rightSection}
-                calculatedResult={calculatedResult}
-                latestMilvusTag={latestTag}
-              />
-            </div>
-          </div>
-
-          <div
-            role="tabpanel"
-            id={sizingTabPanelId(TAB_ID_PREFIX, SizingTabEnum.Gpu)}
-            aria-labelledby={sizingTabId(TAB_ID_PREFIX, SizingTabEnum.Gpu)}
-            hidden={tab !== SizingTabEnum.Gpu}
-            className={clsx({
-              [classes.hiddenPanel]: tab !== SizingTabEnum.Gpu,
-            })}
-          >
-            <GpuSizingTool />
-          </div>
-
-          <ZillizAdv
-            className={classes.zillizAdv}
-            ctaLink={`${CLOUD_SIGNUP_LINK}?utm_source=milvusio&utm_medium=referral&utm_campaign=milvus_bottom_banner&utm_content=tools/sizing`}
-          />
         </div>
-      </Layout>
+
+        <p className={clsx(classes.desc, classes.descWithTabs)}>
+          {t('content')}
+        </p>
+
+        <SizingTabs
+          className={classes.tabsRow}
+          idPrefix={TAB_ID_PREFIX}
+          value={tab}
+          onChange={handleTabChange}
+          hint={
+            tab === SizingTabEnum.Gpu ? t('tabs.gpuHint') : t('tabs.cpuHint')
+          }
+          options={[
+            { value: SizingTabEnum.Cpu, label: t('tabs.cpu') },
+            {
+              value: SizingTabEnum.Gpu,
+              label: t('tabs.gpu'),
+              badge: t('tabs.new'),
+            },
+          ]}
+        />
+
+        <div
+          role="tabpanel"
+          id={sizingTabPanelId(TAB_ID_PREFIX, SizingTabEnum.Cpu)}
+          aria-labelledby={sizingTabId(TAB_ID_PREFIX, SizingTabEnum.Cpu)}
+          hidden={tab !== SizingTabEnum.Cpu}
+          className={clsx({
+            [classes.hiddenPanel]: tab !== SizingTabEnum.Cpu,
+          })}
+        >
+          <div className={classes.contentContainer}>
+            <FormSection
+              className={classes.leftSection}
+              asyncCalculatedResult={asyncCalculatedResult}
+            />
+            <ResultSection
+              className={classes.rightSection}
+              calculatedResult={calculatedResult}
+              latestMilvusTag={latestTag}
+            />
+          </div>
+        </div>
+
+        <div
+          role="tabpanel"
+          id={sizingTabPanelId(TAB_ID_PREFIX, SizingTabEnum.Gpu)}
+          aria-labelledby={sizingTabId(TAB_ID_PREFIX, SizingTabEnum.Gpu)}
+          hidden={tab !== SizingTabEnum.Gpu}
+          className={clsx({
+            [classes.hiddenPanel]: tab !== SizingTabEnum.Gpu,
+          })}
+        >
+          <GpuSizingTool />
+        </div>
+      </div>
     </main>
   );
 }

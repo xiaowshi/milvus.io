@@ -15,7 +15,6 @@ import {
   SelectItem,
 } from '@/components/ui';
 import {
-  ExternalLinkIcon,
   DownloadIcon,
 } from '@/components/icons';
 import { DependencyComponent } from './dependencyComponent';
@@ -23,7 +22,6 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import CustomButton from '@/components/customButton';
 import { MilvusComponent } from './milvusComponent';
-import { CONTACT_SALES_URL } from '@/consts/externalLinks';
 import { checkIconTpl, copyIconTpl } from '@/components/icons';
 import { SizingVersionConfig } from './types';
 
@@ -236,24 +234,16 @@ sudo docker compose up -d`,
               <Trans
                 t={t}
                 i18nKey="setup.outOfRange"
-                components={[<a href={CONTACT_SALES_URL} key="contact-us"></a>]}
+                components={[<span key="contact-us"></span>]}
               />
             }
           </p>
         </div>
       )}
-      <h2 className="flex justify-between items-center gap-[24px] mb-[12px]">
+      <h2 className="mb-[12px]">
         <span className="font-[600] text-[14px] leading-[22px]">
           {t('overview.title')}
         </span>
-        <a
-          className="flex items-center gap-[4px] font-[400] text-[12px] leading-[18px] text-black1 hover:underline"
-          href="https://zilliz.com/pricing#calculator"
-          target="_blank"
-        >
-          {t('overview.explore')}
-          <ExternalLinkIcon />
-        </a>
       </h2>
 
       <div className="bg-gary2 pt-[20px] pb-[20px] rounded-[12px] mb-[24px]">
@@ -554,17 +544,6 @@ sudo docker compose up -d`,
           ></button>
         </pre>
 
-        <a
-          className="flex items-center just gap-[4px] text-[12px] leading-[18px] text-black1 hover:underline"
-          href={
-            installInfo.options.find(v => v.value === installInfo.value)
-              ?.document
-          }
-          target="_blank"
-        >
-          {installInfo.options.find(v => v.value === installInfo.value)?.tip}
-          <ExternalLinkIcon />
-        </a>
       </div>
     </section>
   );

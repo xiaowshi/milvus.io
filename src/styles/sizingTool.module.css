@@ -22,20 +22,14 @@
 
     .title {
       text-align: center;
-      a {
-        @mixin heading2;
+      @mixin heading2;
 
-        font-family: 'Geist', system-ui, sans-serif;
-        color: #000;
-        display: block;
-        max-width: 600px;
-        width: 100%;
-        margin: 0 auto;
-
-        &:hover {
-          text-decoration: underline;
-        }
-      }
+      font-family: 'Geist', system-ui, sans-serif;
+      color: #000;
+      display: block;
+      max-width: 600px;
+      width: 100%;
+      margin: 0 auto;
     }
 
     .selectContainer {
@@ -43,11 +37,21 @@
       right: 0;
       top: 50%;
       transform: translateY(-50%);
-      width: 250px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
 
       @media (max-width: 1280px) {
         position: unset;
         transform: translateY(0);
+      }
+
+      .languageSelector {
+        flex-shrink: 0;
+      }
+
+      .versionSelector {
+        width: 250px;
       }
 
       .selectTrigger {

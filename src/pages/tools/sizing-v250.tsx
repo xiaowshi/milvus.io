@@ -1,6 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
-import Layout from '@/components/layout/commonLayout';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import classes from '@/styles/sizingTool.module.css';
 import pageClasses from '@/styles/responsive.module.css';
 import clsx from 'clsx';
@@ -12,14 +11,11 @@ import {
   ICalculateResult,
   ModeEnum,
 } from '@/types/sizingV250';
-import ZillizAdv from '@/parts/blogs/zillizAdv';
-import { CLOUD_SIGNUP_LINK } from '@/consts';
 import { LanguageEnum } from '@/types/localization';
 import { fetchMilvusReleases } from '@/http/milvus';
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -27,6 +23,8 @@ import {
 import { useRouter } from 'next/router';
 import { SIZING_TOOL_VERSION_OPTIONS } from '@/consts/sizing';
 import { baseValues } from '@/parts/sizingV250/config';
+import { LanguageSelector } from '@/components/language-selector';
+import { useGlobalLocale } from '@/hooks/use-global-locale';
 const { etcdBaseValue, minioBaseValue, pulsarBaseValue, kafkaBaseValue } = baseValues;
 
 type Props = {
@@ -38,6 +36,12 @@ export default function SizingTool(props: Props) {
   const { locale = LanguageEnum.ENGLISH, latestTag } = props;
   const { t } = useTranslation('sizingTool', { lng: locale });
   const router = useRouter();
+  const {
+    locale: activeLocale,
+    disabled: languageSelectorDisabled,
+    disabledLanguages,
+    onLocaleChange,
+  } = useGlobalLocale();
   const currentVersion = SIZING_TOOL_VERSION_OPTIONS.find(
     option => option.href === router.pathname
   );
@@ -115,31 +119,28 @@ export default function SizingTool(props: Props) {
 
   return (
     <main className={classes.pageContainer}>
-      <Layout darkMode={false}>
-        <Head>
-          <title>
-            Milvus Sizing Tool for Milvus v2.5.x and earlier· Vector Database
-            built for scalable similarity search
-          </title>
-          <meta name="description" content="Sizing tool v2.5.x" />
-        </Head>
+      <Head>
+        <title>Estimate Your Cost</title>
+        <meta name="description" content="Sizing tool v2.5.x" />
+      </Head>
 
-        <div
-          className={clsx(
-            pageClasses.homeContainer,
-            classes.sizingToolContainer
-          )}
-        >
-          <div className={classes.titleContainer}>
-            <h1 className={classes.title}>
-              <a
-                href="https://zilliz.com/blog/demystify-milvus-sizing-tool"
-                target="_blank"
-              >
-                {t('titleV250')}
-              </a>
-            </h1>
-            <div className={classes.selectContainer}>
+      <div
+        className={clsx(
+          pageClasses.homeContainer,
+          classes.sizingToolContainer
+        )}
+      >
+        <div className={classes.titleContainer}>
+          <h1 className={classes.title}>Estimate Your Cost</h1>
+          <div className={classes.selectContainer}>
+            <LanguageSelector
+              value={activeLocale}
+              onChange={onLocaleChange}
+              disabled={languageSelectorDisabled}
+              disabledLanguages={disabledLanguages}
+              className={classes.languageSelector}
+            />
+            <div className={classes.versionSelector}>
               <Select
                 value={selectedVersion}
                 onValueChange={handleSelectVersion}
@@ -159,26 +160,21 @@ export default function SizingTool(props: Props) {
               </Select>
             </div>
           </div>
-          <p className={classes.desc}>{t('content')}</p>
+        </div>
+        <p className={classes.desc}>{t('content')}</p>
 
-          <div className={classes.contentContainer}>
-            <FormSection
-              className={classes.leftSection}
-              updateCalculatedResult={updateCalculatedResult}
-            />
-            <ResultSection
-              className={classes.rightSection}
-              calculatedResult={calculatedResult}
-              latestMilvusTag={latestTag}
-            />
-          </div>
-
-          <ZillizAdv
-            className={classes.zillizAdv}
-            ctaLink={`${CLOUD_SIGNUP_LINK}?utm_source=milvusio&utm_medium=referral&utm_campaign=milvus_bottom_banner&utm_content=tools/sizing`}
+        <div className={classes.contentContainer}>
+          <FormSection
+            className={classes.leftSection}
+            updateCalculatedResult={updateCalculatedResult}
+          />
+          <ResultSection
+            className={classes.rightSection}
+            calculatedResult={calculatedResult}
+            latestMilvusTag={latestTag}
           />
         </div>
-      </Layout>
+      </div>
     </main>
   );
 }
