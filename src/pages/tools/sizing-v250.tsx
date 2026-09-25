@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import classes from '@/styles/sizingTool.module.css';
 import pageClasses from '@/styles/responsive.module.css';
@@ -24,6 +24,8 @@ import { useRouter } from 'next/router';
 import { SIZING_TOOL_VERSION_OPTIONS } from '@/consts/sizing';
 import { baseValues } from '@/parts/sizingV250/config';
 import { LanguageSelector } from '@/components/language-selector';
+import { SizingTabs } from '@/components/sizing';
+import { PricingPlanEnum } from '@/parts/sizingCommon/types';
 import { useGlobalLocale } from '@/hooks/use-global-locale';
 const { etcdBaseValue, minioBaseValue, pulsarBaseValue, kafkaBaseValue } = baseValues;
 
@@ -105,9 +107,17 @@ export default function SizingTool(props: Props) {
     currentVersion?.value || SIZING_TOOL_VERSION_OPTIONS[0].value
   );
 
+  const [pricingPlan, setPricingPlan] = useState<PricingPlanEnum>(
+    PricingPlanEnum.Shared
+  );
+
   const updateCalculatedResult = (result: ICalculateResult) => {
-    setCalculatedResult(result);
+    setCalculatedResult({ ...result, pricingPlan });
   };
+
+  useEffect(() => {
+    setCalculatedResult(prev => ({ ...prev, pricingPlan }));
+  }, [pricingPlan]);
 
   const handleSelectVersion = (value: string) => {
     setSelectedVersion(value);
@@ -161,7 +171,28 @@ export default function SizingTool(props: Props) {
             </div>
           </div>
         </div>
-        <p className={classes.desc}>{t('content')}</p>
+        <p className={clsx(classes.desc, classes.descWithTabs)}>
+          {t('content')}
+        </p>
+
+        <SizingTabs<PricingPlanEnum>
+          className={classes.tabsRow}
+          idPrefix="pricing-plan"
+          value={pricingPlan}
+          onChange={setPricingPlan}
+          hint={
+            pricingPlan === PricingPlanEnum.Shared
+              ? t('pricingPlan.sharedHint')
+              : t('pricingPlan.dedicatedHint')
+          }
+          options={[
+            { value: PricingPlanEnum.Shared, label: t('pricingPlan.shared') },
+            {
+              value: PricingPlanEnum.Dedicated,
+              label: t('pricingPlan.dedicated'),
+            },
+          ]}
+        />
 
         <div className={classes.contentContainer}>
           <FormSection

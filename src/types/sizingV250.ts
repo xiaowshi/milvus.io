@@ -1,3 +1,5 @@
+import { PricingPlanEnum } from '@/parts/sizingCommon/types';
+
 export type DataSizeUnit = 'B' | 'KB' | 'MB' | 'GB' | 'TB';
 export enum SegmentSizeEnum {
   _512MB = '512',
@@ -89,5 +91,6 @@ export interface ICalculateResult {
   dependencyConfig: DependencyConfigType;
   mode: ModeEnum;
   dependency: DependencyComponentEnum;
+  pricingPlan?: PricingPlanEnum;
   isOutOfCalculate: boolean;
 }

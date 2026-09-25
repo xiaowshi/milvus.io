@@ -70,6 +70,12 @@ export interface SizingVersionConfig {
   };
 }
 
+// Pricing plan switcher shown under the page subtitle
+export enum PricingPlanEnum {
+  Shared = 'shared',
+  Dedicated = 'dedicated',
+}
+
 // Dependency option with icon
 export interface DependencyOption {
   label: string;

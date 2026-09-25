@@ -81,6 +81,16 @@
     }
   }
 
+  /* The plan switcher sits directly under the subtitle, so the airy gap
+     below `.desc` moves to the bottom of the switcher block instead. */
+  .descWithTabs {
+    margin-bottom: 26px;
+  }
+
+  .tabsRow {
+    margin-bottom: 24px;
+  }
+
   .tipWrapper {
     display: flex;
     align-items: flex-start;

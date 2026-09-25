@@ -144,5 +144,11 @@
       "pqCodeNotByteAligned": "pq_dim × nbits must be a multiple of 8.",
       "intermediateDegreeTooSmall": "intermediate_graph_degree must be greater than or equal to graph_degree."
     }
+  },
+  "pricingPlan": {
+    "shared": "Shared Pool",
+    "dedicated": "Dedicated Pool",
+    "sharedHint": "Resources are shared with other workloads in a common pool.",
+    "dedicatedHint": "Resources are reserved exclusively for your deployment."
   }
 }

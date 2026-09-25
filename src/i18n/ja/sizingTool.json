@@ -110,5 +110,11 @@
   },
   "woodpeckerTip": "<0>Woodpeckerは</0>、Milvus 2.6.0から採用されたクラウドネイティブのWAL（ライト・アヘッド・ログ）システムです。MilvusのMQとしてKafkaとPulsarを置き換えるように設計されており、オペレーションを簡素化し、スループットを最大化し、楽にスケールすることができる。現在のところ、ストリーミング・ノードに組み込まれて稼働している。",
   "previousVersion": "旧バージョンのサイズ調整ツールは<0>こちら</0>。",
-  "titleV250": "Milvus v2.5.x用Milvusサイジングツール"
+  "titleV250": "Milvus v2.5.x用Milvusサイジングツール",
+  "pricingPlan": {
+    "shared": "共有プール",
+    "dedicated": "専用プール",
+    "sharedHint": "リソースは共通プール内で他のワークロードと共有されます。",
+    "dedicatedHint": "リソースはお客様のデプロイメント専用に確保されます。"
+  }
 }
