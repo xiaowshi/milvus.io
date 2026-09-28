@@ -4,5 +4,7 @@ export { MilvusComponent } from './milvusComponent';
 export { DependencyComponent } from './dependencyComponent';
 export { IndexTypeComponent } from './indexTypeComponent';
 export { PulsarIcon, KafkaIcon, WoodpeckerIcon, DataCard } from './components';
+export { VectorFields } from './vectorFields';
+export * from './vectorFieldSchema';
 export * from './baseValues';
 export * from './types';

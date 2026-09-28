@@ -41,32 +41,24 @@ export const $100M768D = dataSizeConstants.$100M768D;
 export const $500M768D = dataSizeConstants.$500M768D;
 export const $1B768D = dataSizeConstants.$1B768D;
 
-// loading memory and disk calculator
-export const memoryAndDiskCalculator = (params: {
-  rawDataSize: number;
-  indexTypeParams: IIndexType;
+/** One vector field as the sizing form describes it (dimension + index). */
+export interface VectorFieldSizingInput {
   d: number;
+  indexTypeParams: IIndexType;
+}
+
+/**
+ * Index memory / disk for a single vector field, before the collection-level
+ * growing-segment buffer and the 1.15 overhead factor are applied.
+ */
+export const vectorIndexMemoryAndDisk = (params: {
   num: number;
-  withScalar: boolean;
-  offLoading: boolean;
-  scalarAvg: number;
-  segSize: number;
-  mode: ModeEnum;
+  d: number;
+  indexTypeParams: IIndexType;
 }) => {
-  const {
-    rawDataSize,
-    num,
-    d,
-    withScalar,
-    scalarAvg,
-    offLoading,
-    indexTypeParams,
-    segSize,
-    mode,
-  } = params;
+  const { num, d, indexTypeParams } = params;
   const { indexType, widthRawData, maxDegree, m, flatNList, sq8NList } =
     indexTypeParams;
-  const segmentSizeByte = unitAny2BYTE(segSize, 'MB');
   const vectorRawDataSize = ((num * d * 32) / 8) * ONE_MILLION;
 
   let result = {
@@ -123,6 +115,31 @@ export const memoryAndDiskCalculator = (params: {
       break;
   }
 
+  return result;
+};
+
+// loading memory and disk calculator
+export const memoryAndDiskCalculator = (params: {
+  rawDataSize: number;
+  vectorFields: VectorFieldSizingInput[];
+  num: number;
+  withScalar: boolean;
+  offLoading: boolean;
+  scalarAvg: number;
+  segSize: number;
+  mode: ModeEnum;
+}) => {
+  const { num, withScalar, scalarAvg, offLoading, vectorFields, segSize } =
+    params;
+  const segmentSizeByte = unitAny2BYTE(segSize, 'MB');
+
+  // Every vector field is indexed and loaded on its own, so sum them.
+  const perField = vectorFields.map(field =>
+    vectorIndexMemoryAndDisk({ num, ...field })
+  );
+  const vectorIndexMemory = perField.reduce((sum, r) => sum + r.memory, 0);
+  const vectorIndexDisk = perField.reduce((sum, r) => sum + r.disk, 0);
+
   const scalarLoadingMemory = withScalar
     ? offLoading
       ? (num * scalarAvg * ONE_MILLION) / 10
@@ -131,19 +148,19 @@ export const memoryAndDiskCalculator = (params: {
 
   const scalarLocalDisk = offLoading ? num * scalarAvg * ONE_MILLION : 0;
 
-  if (indexType === IndexTypeEnum.DISKANN) {
-    const vectorLoadingMemory = result.memory * 1.15;
-    return {
-      memory: vectorLoadingMemory + scalarLoadingMemory, // bytes
-      disk: scalarLocalDisk + result.disk, // bytes
-    };
-  }
-
-  const vectorLoadingMemory = (result.memory + segmentSizeByte * 2) * 1.15;
+  // The growing-segment buffer is collection-wide and counted once. A
+  // collection whose vector fields are all DISKANN skips it, matching the
+  // single-field behaviour.
+  const needsSegmentBuffer = vectorFields.some(
+    field => field.indexTypeParams.indexType !== IndexTypeEnum.DISKANN
+  );
+  const vectorLoadingMemory =
+    (vectorIndexMemory + (needsSegmentBuffer ? segmentSizeByte * 2 : 0)) *
+    1.15;
 
   return {
     memory: vectorLoadingMemory + scalarLoadingMemory, // bytes
-    disk: scalarLocalDisk + result.disk, // bytes
+    disk: scalarLocalDisk + vectorIndexDisk, // bytes
   };
 };
 

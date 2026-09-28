@@ -17,13 +17,17 @@ import {
   SelectItem,
 } from '@/components/ui';
 import clsx from 'clsx';
-import { IndexTypeComponent } from './indexTypeComponent';
 import { Trans, useTranslation } from 'react-i18next';
 import { TooltipArrow } from '@radix-ui/react-tooltip';
-import { ExternalLinkIcon } from '@/components/icons';
 import { SizingVersionConfig } from './types';
 import { SchemaFields } from './schemaFields';
 import { SchemaField, defaultSchemaFields, schemaBytesPerRow } from './schema';
+import { VectorFields } from './vectorFields';
+import {
+  VectorFieldConfig,
+  defaultVectorFields,
+  totalDimension,
+} from './vectorFieldSchema';
 
 interface FormSectionProps {
   className: string;
@@ -36,23 +40,9 @@ export default function FormSection(props: FormSectionProps) {
   const { t } = useTranslation('sizingTool');
   const { className, config, onCalculatedResult, disableCalculationThreshold = false } = props;
 
-  const {
-    VECTOR_RANGE_CONFIG,
-    DIMENSION_RANGE_CONFIG,
-    SEGMENT_SIZE_OPTIONS,
-    INDEX_TYPE_OPTIONS,
-    N_LIST_RANGE_CONFIG,
-    MAX_NODE_DEGREE_RANGE_CONFIG,
-    M_RANGE_CONFIG,
-    REFINE_OPTIONS,
-  } = config.consts;
+  const { VECTOR_RANGE_CONFIG, SEGMENT_SIZE_OPTIONS } = config.consts;
 
-  const {
-    ModeEnum,
-    IndexTypeEnum,
-    DependencyComponentEnum,
-    RefineValueEnum,
-  } = config.types;
+  const { ModeEnum, DependencyComponentEnum } = config.types;
 
   const {
     memoryAndDiskCalculator,
@@ -67,13 +57,9 @@ export default function FormSection(props: FormSectionProps) {
 
   const [rawDataSize, setRawDataSize] = useState(0);
 
-  const [refine, setRefine] = useState(
-    config.supportsRabitq && REFINE_OPTIONS ? REFINE_OPTIONS[0].value : null
-  );
-
   const [form, setForm] = useState({
     vector: VECTOR_RANGE_CONFIG.defaultValue,
-    dimension: DIMENSION_RANGE_CONFIG.defaultValue,
+    vectorFields: defaultVectorFields(config) as VectorFieldConfig[],
     widthScalar: false,
     scalarData: {
       fields: defaultSchemaFields() as SchemaField[],
@@ -85,28 +71,6 @@ export default function FormSection(props: FormSectionProps) {
     mode: ModeEnum.Cluster,
   });
 
-  const initialIndexTypeParams = useMemo(() => {
-    const base: any = {
-      indexType: INDEX_TYPE_OPTIONS[0].value,
-      widthRawData: false,
-      maxDegree: MAX_NODE_DEGREE_RANGE_CONFIG.defaultValue,
-      inlinePq: MAX_NODE_DEGREE_RANGE_CONFIG.defaultValue,
-      flatNList: N_LIST_RANGE_CONFIG.defaultValue,
-      sq8NList: N_LIST_RANGE_CONFIG.defaultValue,
-      m: M_RANGE_CONFIG.defaultValue,
-    };
-    if (config.supportsRabitq) {
-      base.rabitqNList = N_LIST_RANGE_CONFIG.defaultValue;
-    }
-    return base;
-  }, [config.supportsRabitq]);
-
-  const [indexTypeParams, setIndexTypeParams] = useState(initialIndexTypeParams);
-
-  const handleRefineChange = (value: any) => {
-    setRefine(value);
-  };
-
   const handleFormChange = (key: string, value: any) => {
     setForm({
       ...form,
@@ -114,12 +78,19 @@ export default function FormSection(props: FormSectionProps) {
     });
   };
 
-  const handleIndexTypeParamsChange = (key: string, value: any) => {
-    setIndexTypeParams({
-      ...indexTypeParams,
-      [key]: value,
+  const handleVectorFieldsChange = (vectorFields: VectorFieldConfig[]) => {
+    setForm({
+      ...form,
+      vectorFields,
     });
   };
+
+  // Raw data is linear in dimension, so the summed dimension of all vector
+  // fields drives the collection-level calculators.
+  const dimension = useMemo(
+    () => totalDimension(form.vectorFields),
+    [form.vectorFields]
+  );
 
   const handleSchemaChange = (fields: SchemaField[]) => {
     setForm({
@@ -167,25 +138,24 @@ export default function FormSection(props: FormSectionProps) {
   useEffect(() => {
     const rawDataSize = rawDataSizeCalculator({
       num: form.vector,
-      d: form.dimension,
+      d: dimension,
       withScalar: form.widthScalar,
       scalarAvg,
     });
     setRawDataSize(rawDataSize);
-  }, [
-    form.vector,
-    form.dimension,
-    form.widthScalar,
-    scalarAvg,
-  ]);
+  }, [form.vector, dimension, form.widthScalar, scalarAvg]);
 
   useEffect(() => {
     const currentMode = form.mode;
 
     const calculatorParams: any = {
       rawDataSize,
-      indexTypeParams,
-      d: form.dimension,
+      vectorFields: form.vectorFields.map(field => ({
+        d: field.dimension,
+        indexTypeParams: field.indexTypeParams,
+        // refineType only matters for RABITQ on versions that support it
+        refineType: config.supportsRabitq ? field.refineType : undefined,
+      })),
       num: form.vector,
       withScalar: form.widthScalar,
       offLoading: form.scalarData.offLoading,
@@ -193,11 +163,6 @@ export default function FormSection(props: FormSectionProps) {
       segSize: Number(form.segmentSize),
       mode: currentMode,
     };
-
-    // Add refineType for v3
-    if (config.supportsRabitq && refine) {
-      calculatorParams.refineType = refine;
-    }
 
     const { memory, disk: localDisk } = memoryAndDiskCalculator(calculatorParams);
 
@@ -211,7 +176,7 @@ export default function FormSection(props: FormSectionProps) {
 
     const dependencyParams: any = {
       num: form.vector,
-      d: form.dimension,
+      d: dimension,
       withScalar: form.widthScalar,
       scalarAvg,
       mode: currentMode,
@@ -236,7 +201,7 @@ export default function FormSection(props: FormSectionProps) {
       dependency: form.dependency,
       isOutOfCalculate: disableCalculationThreshold ? false : rawDataSize > $1B768D,
     });
-  }, [form, indexTypeParams, refine, rawDataSize]);
+  }, [form, rawDataSize]);
 
   return (
     <section className={clsx(className, classes.formSection)}>
@@ -252,62 +217,11 @@ export default function FormSection(props: FormSectionProps) {
             unit="Million"
           />
         </div>
-        <div className="mb-[24px]">
-          <SizingRange
-            rangeConfig={DIMENSION_RANGE_CONFIG}
-            label={t('form.dim')}
-            onRangeChange={val => {
-              handleFormChange('dimension', val);
-            }}
-            value={form.dimension}
-            placeholder={`[${DIMENSION_RANGE_CONFIG.min}, ${DIMENSION_RANGE_CONFIG.max}]`}
-          />
-        </div>
-        <div className="mb-[24px]">
-          <h4 className="flex items-center justify-between mb-[8px]">
-            <span className="font-[600] text-[14px] leading-[22px] text-black1">
-              {t('form.indexType')}
-            </span>
-            <a
-              className="flex items-center gap-[4px] font-[400] text-[12px] leading-[16px] text-black1 hover:underline"
-              href="https://milvus.io/docs/zh/index-explained.md"
-              target="_blank"
-            >
-              {t('form.indexTypeTip')}
-              <ExternalLinkIcon />
-            </a>
-          </h4>
-
-          <Select
-            value={indexTypeParams.indexType}
-            onValueChange={val => {
-              handleIndexTypeParamsChange('indexType', val);
-            }}
-          >
-            <SelectTrigger className={classes.selectTrigger}>
-              {indexTypeParams.indexType}
-            </SelectTrigger>
-            <SelectContent>
-              {INDEX_TYPE_OPTIONS.map((v: any) => (
-                <SelectItem
-                  key={v.value}
-                  value={v.value}
-                  className={classes.selectItem}
-                >
-                  {v.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <IndexTypeComponent
-            data={indexTypeParams}
-            onChange={handleIndexTypeParamsChange}
-            config={config}
-            refine={refine}
-            onRefineChange={handleRefineChange}
-          />
-        </div>
+        <VectorFields
+          fields={form.vectorFields}
+          onChange={handleVectorFieldsChange}
+          config={config}
+        />
         <div className="">
           <div className="flex items-center gap-[8px]">
             <p className="text-[14px] leading-[22px] font-[600]">
