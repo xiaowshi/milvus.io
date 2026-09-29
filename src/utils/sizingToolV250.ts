@@ -11,6 +11,8 @@ import {
   NodesKeyType,
 } from '@/types/sizingV250';
 
+import { ScalarSizingResult, SizingBreakdown } from '@/types/sizingScalar';
+
 // Re-export common utilities
 export {
   unitBYTE2Any,
@@ -123,15 +125,14 @@ export const memoryAndDiskCalculator = (params: {
   rawDataSize: number;
   vectorFields: VectorFieldSizingInput[];
   num: number;
-  withScalar: boolean;
-  offLoading: boolean;
-  scalarAvg: number;
+  /** Output of `scalarSizingCalculator`; all zeros when the scalar switch is off. */
+  scalar: ScalarSizingResult;
   segSize: number;
   mode: ModeEnum;
-}) => {
-  const { num, withScalar, scalarAvg, offLoading, vectorFields, segSize } =
-    params;
+}): { memory: number; disk: number; breakdown: SizingBreakdown } => {
+  const { num, scalar, vectorFields, segSize, rawDataSize } = params;
   const segmentSizeByte = unitAny2BYTE(segSize, 'MB');
+  const RUNTIME_OVERHEAD = 1.15;
 
   // Every vector field is indexed and loaded on its own, so sum them.
   const perField = vectorFields.map(field =>
@@ -140,13 +141,12 @@ export const memoryAndDiskCalculator = (params: {
   const vectorIndexMemory = perField.reduce((sum, r) => sum + r.memory, 0);
   const vectorIndexDisk = perField.reduce((sum, r) => sum + r.disk, 0);
 
-  const scalarLoadingMemory = withScalar
-    ? offLoading
-      ? (num * scalarAvg * ONE_MILLION) / 10
-      : num * scalarAvg * ONE_MILLION
-    : 0;
-
-  const scalarLocalDisk = offLoading ? num * scalarAvg * ONE_MILLION : 0;
+  // Scalar raw columns and scalar indexes resident on the query node. The
+  // mmap'd share has already been discounted by the scalar calculator, so the
+  // runtime overhead factor applies to whatever is still resident.
+  const scalarRawMemory = scalar.loadedMemory * RUNTIME_OVERHEAD;
+  const scalarIndexMemory = scalar.indexMemory * RUNTIME_OVERHEAD;
+  const scalarLocalDisk = scalar.localDisk;
 
   // The growing-segment buffer is collection-wide and counted once. A
   // collection whose vector fields are all DISKANN skips it, matching the
@@ -154,13 +154,24 @@ export const memoryAndDiskCalculator = (params: {
   const needsSegmentBuffer = vectorFields.some(
     field => field.indexTypeParams.indexType !== IndexTypeEnum.DISKANN
   );
+  const segmentBufferMemory =
+    (needsSegmentBuffer ? segmentSizeByte * 2 : 0) * RUNTIME_OVERHEAD;
   const vectorLoadingMemory =
-    (vectorIndexMemory + (needsSegmentBuffer ? segmentSizeByte * 2 : 0)) *
-    1.15;
+    vectorIndexMemory * RUNTIME_OVERHEAD + segmentBufferMemory;
 
   return {
-    memory: vectorLoadingMemory + scalarLoadingMemory, // bytes
+    memory: vectorLoadingMemory + scalarRawMemory + scalarIndexMemory, // bytes
     disk: scalarLocalDisk + vectorIndexDisk, // bytes
+    breakdown: {
+      vectorRawData: Math.max(rawDataSize - scalar.rawBytes, 0),
+      vectorIndexMemory: vectorIndexMemory * RUNTIME_OVERHEAD,
+      segmentBufferMemory,
+      scalarRawData: scalar.rawBytes,
+      scalarRawMemory,
+      scalarIndexMemory,
+      scalarLocalDisk,
+      vectorIndexDisk,
+    },
   };
 };
 
@@ -248,9 +259,19 @@ export const dependencyCalculator = (params: {
   mode: ModeEnum;
   withScalar: boolean;
   scalarAvg: number;
+  /** Scalar index files on object storage, from `scalarSizingCalculator`. */
+  scalarIndexStorage?: number;
   loadingMemory: number;
 }): DependencyConfigType => {
-  const { num, d, mode, scalarAvg, withScalar, loadingMemory } = params;
+  const {
+    num,
+    d,
+    mode,
+    scalarAvg,
+    withScalar,
+    loadingMemory,
+    scalarIndexStorage = 0,
+  } = params;
   const MINIMUM_MINIO_PVC_SIZE = 30; //GB
   const MINIMUM_PULSAR_LEDGERS = 20; //GB
   const MAXIMUM_PULSAR_JOURNAL = 50; //GB
@@ -263,8 +284,11 @@ export const dependencyCalculator = (params: {
     scalarAvg,
   });
 
+  // Binlog + loaded data as before, plus the scalar index files explicitly.
   const minioPvc = Math.max(
-    Math.ceil((rawDataSize + loadingMemory) / 1024 / 1024 / 1024),
+    Math.ceil(
+      (rawDataSize + loadingMemory + scalarIndexStorage) / 1024 / 1024 / 1024
+    ),
     MINIMUM_MINIO_PVC_SIZE
   ); // GB
 

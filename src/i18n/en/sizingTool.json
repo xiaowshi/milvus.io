@@ -47,8 +47,14 @@
       "pk": "PK",
       "averageLength": "Average Length",
       "averageCapacity": "Average Capacity",
-      "elementType": "Element Type"
-    }
+      "elementType": "Element Type",
+      "index": "Index",
+      "indexNone": "None",
+      "pkStats": "PK stats",
+      "cardinality": "Cardinality",
+      "cardinalityTip": "BITMAP is recommended for fields with fewer than {{max}} distinct values."
+    },
+    "offloadingScope": "Applies to scalar raw data and INVERTED scalar indexes; other scalar index types stay in memory. About {{percent}}% of the mapped data is assumed to stay resident."
   },
   "overview": {
     "title": "Resource Requirements",
@@ -66,6 +72,16 @@
       "milvusStorage": "Milvus Storage (Local PVC)",
       "s3Disk": "S3 Disk",
       "kafkaStorage": "Kafka Storage"
+    },
+    "breakdown": {
+      "vectorRaw": "Vector raw data",
+      "scalarRaw": "Scalar raw data",
+      "vectorIndex": "Vector indexes",
+      "segmentBuffer": "Growing segment buffer",
+      "scalarRawMemory": "Scalar raw data",
+      "scalarIndex": "Scalar indexes",
+      "overhead": "Each item includes the 1.15 runtime overhead factor.",
+      "scalarMmap": "incl. {{size}} scalar data mapped to disk"
     }
   },
   "setup": {

@@ -21,7 +21,14 @@ import { Trans, useTranslation } from 'react-i18next';
 import { TooltipArrow } from '@radix-ui/react-tooltip';
 import { SizingVersionConfig } from './types';
 import { SchemaFields } from './schemaFields';
-import { SchemaField, defaultSchemaFields, schemaBytesPerRow } from './schema';
+import { SchemaField, defaultSchemaFields } from './schema';
+import {
+  emptyScalarSizing,
+  scalarSizingCalculator,
+} from '@/utils/sizingScalar';
+// Both sizing versions define entities in millions with the same base.
+import { ONE_MILLION } from '@/consts/sizing';
+import { MMAP_RESIDENT_RATIO } from '@/consts/sizingScalar';
 import { VectorFields } from './vectorFields';
 import {
   VectorFieldConfig,
@@ -102,12 +109,29 @@ export default function FormSection(props: FormSectionProps) {
     });
   };
 
-  // Average scalar bytes per row, derived from the field table.
-  const scalarAvg = useMemo(
+  // Scalar raw data, resident memory, index memory, mmap'd disk and object
+  // storage derived from the field table. The single "offloading" checkbox
+  // drives both queryNode.mmap.scalarField and queryNode.mmap.scalarIndex.
+  const scalar = useMemo(
     () =>
-      form.widthScalar ? schemaBytesPerRow(form.scalarData.fields) : 0,
-    [form.widthScalar, form.scalarData.fields]
+      form.widthScalar
+        ? scalarSizingCalculator({
+            fields: form.scalarData.fields,
+            rows: form.vector * ONE_MILLION,
+            mmapScalarField: form.scalarData.offLoading,
+            mmapScalarIndex: form.scalarData.offLoading,
+            config: config.scalar,
+          })
+        : emptyScalarSizing(),
+    [
+      form.widthScalar,
+      form.scalarData.fields,
+      form.scalarData.offLoading,
+      form.vector,
+      config.scalar,
+    ]
   );
+  const scalarAvg = scalar.bytesPerRow;
 
   const handleOffLoadingChange = (value: boolean) => {
     setForm({
@@ -157,14 +181,16 @@ export default function FormSection(props: FormSectionProps) {
         refineType: config.supportsRabitq ? field.refineType : undefined,
       })),
       num: form.vector,
-      withScalar: form.widthScalar,
-      offLoading: form.scalarData.offLoading,
-      scalarAvg,
+      scalar,
       segSize: Number(form.segmentSize),
       mode: currentMode,
     };
 
-    const { memory, disk: localDisk } = memoryAndDiskCalculator(calculatorParams);
+    const {
+      memory,
+      disk: localDisk,
+      breakdown,
+    } = memoryAndDiskCalculator(calculatorParams);
 
     const standaloneNodeConfig = standaloneNodeConfigCalculator({
       memory: memory,
@@ -179,6 +205,7 @@ export default function FormSection(props: FormSectionProps) {
       d: dimension,
       withScalar: form.widthScalar,
       scalarAvg,
+      scalarIndexStorage: scalar.indexObjectStorage,
       mode: currentMode,
       loadingMemory: memory,
     };
@@ -194,6 +221,7 @@ export default function FormSection(props: FormSectionProps) {
       rawDataSize,
       memorySize: memory,
       localDiskSize: localDisk,
+      breakdown,
       clusterNodeConfig,
       standaloneNodeConfig,
       dependencyConfig: dependencyConfig,
@@ -261,7 +289,10 @@ export default function FormSection(props: FormSectionProps) {
                     t={t}
                     i18nKey="form.mmp"
                     components={[<a href="/docs/mmap.md" key="mmp"></a>]}
-                  />
+                  />{' '}
+                  {t('form.offloadingScope', {
+                    percent: Math.round(MMAP_RESIDENT_RATIO * 100),
+                  })}
                 </p>
               </div>
             </div>

@@ -80,7 +80,48 @@ export default function ResultSection(props: ResultSectionProps) {
     dependency,
     pricingPlan = PricingPlanEnum.Shared,
     isOutOfCalculate,
+    breakdown,
   } = calculatedResult;
+
+  // Vector / scalar split shown in the overview tooltips.
+  const formatBytes = (bytes: number) => {
+    const { size, unit } = unitBYTE2Any(bytes);
+    return `${size} ${unit}`;
+  };
+  const percentOf = (part: number, total: number) =>
+    total > 0 ? `${Math.round((part / total) * 100)}%` : '0%';
+  const rawBreakdownRows = breakdown
+    ? [
+        { key: 'vectorRaw', value: breakdown.vectorRawData },
+        { key: 'scalarRaw', value: breakdown.scalarRawData },
+      ]
+    : [];
+  const memoryBreakdownRows = breakdown
+    ? [
+        { key: 'vectorIndex', value: breakdown.vectorIndexMemory },
+        { key: 'segmentBuffer', value: breakdown.segmentBufferMemory },
+        { key: 'scalarRawMemory', value: breakdown.scalarRawMemory },
+        { key: 'scalarIndex', value: breakdown.scalarIndexMemory },
+      ]
+    : [];
+  const scalarLocalDisk = breakdown?.scalarLocalDisk ?? 0;
+  const renderBreakdown = (
+    rows: { key: string; value: number }[],
+    total: number
+  ) =>
+    rows.length > 0 && (
+      <ul className={classes.breakdownList}>
+        {rows.map(row => (
+          <li key={row.key} className={classes.breakdownRow}>
+            <span>{t(`overview.breakdown.${row.key}`)}</span>
+            <span className="whitespace-nowrap">
+              {formatBytes(row.value)}
+              <span className="opacity-70"> · {percentOf(row.value, total)}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
+    );
 
   const { queryNode, proxy, mixCoord, dataNode } = clusterNodeConfig;
   const extraNode = clusterNodeConfig[extraNodeKey];
@@ -318,6 +359,7 @@ sudo docker compose up -d`,
                   </TooltipTrigger>
                   <TooltipContent sideOffset={5} className="w-[280px]">
                     {t('overview.rawTooltip')}
+                    {renderBreakdown(rawBreakdownRows, rawDataSize)}
                     <TooltipArrow />
                   </TooltipContent>
                 </Tooltip>
@@ -342,6 +384,12 @@ sudo docker compose up -d`,
                   </TooltipTrigger>
                   <TooltipContent sideOffset={5} className="w-[280px]">
                     {t('overview.memoryTooltip')}
+                    {renderBreakdown(memoryBreakdownRows, memorySize)}
+                    {memoryBreakdownRows.length > 0 && (
+                      <p className={classes.breakdownNote}>
+                        {t('overview.breakdown.overhead')}
+                      </p>
+                    )}
                     <TooltipArrow />
                   </TooltipContent>
                 </Tooltip>
@@ -402,6 +450,13 @@ sudo docker compose up -d`,
                 isOut: isOutOfCalculate,
               })}
             </p>
+            {scalarLocalDisk > 0 && !isOutOfCalculate && (
+              <p className={classes.breakdownHint}>
+                {t('overview.breakdown.scalarMmap', {
+                  size: formatBytes(scalarLocalDisk),
+                })}
+              </p>
+            )}
           </div>
         </div>
 

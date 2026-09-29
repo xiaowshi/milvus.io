@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import { ScalarVersionConfig } from '@/utils/sizingScalar';
 
 // Version config type for sizing tool
 export interface SizingVersionConfig {
@@ -19,6 +20,9 @@ export interface SizingVersionConfig {
   extraNodeLabelKey: string;
   extraNodeTipKey: string;
 
+  // Scalar index behaviour (AUTOINDEX mapping, mmap support)
+  scalar: ScalarVersionConfig;
+
   // Import paths - these are passed as actual modules
   types: {
     ModeEnum: any;
@@ -37,7 +41,6 @@ export interface SizingVersionConfig {
     MODE_OPTIONS: any;
     N_LIST_RANGE_CONFIG: any;
     M_RANGE_CONFIG: any;
-    MAXIMUM_AVERAGE_LENGTH: any;
     REFINE_OPTIONS?: any;
   };
 

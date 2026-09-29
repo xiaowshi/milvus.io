@@ -23,7 +23,16 @@ import {
   clampFieldNumber,
   createArraySubSchema,
   createScalarField,
+  reindexField,
+  retypeField,
+  scalarIndexOptionsForType,
 } from './schema';
+import { ScalarIndexTypeEnum } from '@/types/sizingScalar';
+import {
+  BITMAP_RECOMMENDED_MAX_CARDINALITY,
+  MAX_CARDINALITY,
+  MIN_CARDINALITY,
+} from '@/consts/sizingScalar';
 
 interface SchemaFieldsProps {
   fields: SchemaField[];
@@ -50,8 +59,12 @@ export const SchemaFields = (props: SchemaFieldsProps) => {
   const { fields, onChange } = props;
   const { t } = useTranslation('sizingTool');
 
+  const replaceField = (index: number, next: SchemaField) => {
+    onChange(fields.map((f, i) => (i === index ? next : f)));
+  };
+
   const updateField = (index: number, patch: Partial<SchemaField>) => {
-    onChange(fields.map((f, i) => (i === index ? { ...f, ...patch } : f)));
+    replaceField(index, { ...fields[index], ...patch });
   };
 
   const removeField = (index: number) => {
@@ -63,16 +76,23 @@ export const SchemaFields = (props: SchemaFieldsProps) => {
   };
 
   const handleTypeChange = (index: number, fieldType: FieldTypeEnum) => {
-    const patch: Partial<SchemaField> = { fieldType };
-    patch.subSchema =
-      fieldType === FieldTypeEnum.Array ? createArraySubSchema() : undefined;
-    updateField(index, patch);
+    replaceField(index, retypeField(fields[index], fieldType));
+  };
+
+  const handleIndexChange = (index: number, value: ScalarIndexTypeEnum) => {
+    replaceField(index, reindexField(fields[index], value));
   };
 
   const handleAverageLength = (index: number, raw: string) => {
     const value = clampFieldNumber(raw, MIN_AVERAGE_LENGTH, MAX_AVERAGE_LENGTH);
     if (value === undefined) return;
     updateField(index, { averageLength: value });
+  };
+
+  const handleCardinality = (index: number, raw: string) => {
+    const value = clampFieldNumber(raw, MIN_CARDINALITY, MAX_CARDINALITY);
+    if (value === undefined) return;
+    updateField(index, { cardinality: value });
   };
 
   const handleSubSchema = (
@@ -95,6 +115,9 @@ export const SchemaFields = (props: SchemaFieldsProps) => {
     updateField(index, { subSchema: { ...current, [key]: value } });
   };
 
+  const indexLabel = (value: ScalarIndexTypeEnum) =>
+    value === ScalarIndexTypeEnum.None ? t('form.schema.indexNone') : value;
+
   return (
     <div className={classes.schemaTable}>
       <p className={classes.schemaHeader}>{t('form.schema.field')}</p>
@@ -108,6 +131,12 @@ export const SchemaFields = (props: SchemaFieldsProps) => {
           );
           const isArray = field.fieldType === FieldTypeEnum.Array;
           const sub = field.subSchema ?? createArraySubSchema();
+          const indexOptions = scalarIndexOptionsForType(field.fieldType);
+          const isBitmap = field.index === ScalarIndexTypeEnum.Bitmap;
+          const cardinalityTooHigh =
+            isBitmap &&
+            typeof field.cardinality === 'number' &&
+            field.cardinality > BITMAP_RECOMMENDED_MAX_CARDINALITY;
 
           return (
             <li key={field.id} className={classes.schemaRow}>
@@ -198,6 +227,59 @@ export const SchemaFields = (props: SchemaFieldsProps) => {
                       />
                     )}
                   </>
+                )}
+
+                <div className={classes.schemaInput}>
+                  <div className={classes.schemaInputLabel}>
+                    {t('form.schema.index')}
+                  </div>
+                  {field.primary ? (
+                    <div
+                      className={clsx(
+                        classes.schemaSelectTrigger,
+                        classes.schemaStaticValue
+                      )}
+                    >
+                      {t('form.schema.pkStats')}
+                    </div>
+                  ) : (
+                    <Select
+                      value={field.index}
+                      onValueChange={value =>
+                        handleIndexChange(index, value as ScalarIndexTypeEnum)
+                      }
+                    >
+                      <SelectTrigger className={classes.schemaSelectTrigger}>
+                        {indexLabel(field.index)}
+                      </SelectTrigger>
+                      <SelectContent>
+                        {indexOptions.map(option => (
+                          <SelectItem key={option} value={option}>
+                            {indexLabel(option)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
+
+                {isBitmap && (
+                  <div className={classes.schemaInput}>
+                    <SizingInput
+                      customSize="small"
+                      label={t('form.schema.cardinality')}
+                      value={field.cardinality}
+                      onChange={e => handleCardinality(index, e.target.value)}
+                      placeholder={`[${MIN_CARDINALITY}, ${MAX_CARDINALITY.toLocaleString('en-US')}]`}
+                    />
+                    {cardinalityTooHigh && (
+                      <p className={classes.schemaWarning}>
+                        {t('form.schema.cardinalityTip', {
+                          max: BITMAP_RECOMMENDED_MAX_CARDINALITY,
+                        })}
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
 

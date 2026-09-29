@@ -1,4 +1,5 @@
 import { PricingPlanEnum } from '@/parts/sizingCommon/types';
+import { SizingBreakdown } from '@/types/sizingScalar';
 
 export type DataSizeUnit = 'B' | 'KB' | 'MB' | 'GB' | 'TB';
 export enum SegmentSizeEnum {
@@ -86,6 +87,8 @@ export interface ICalculateResult {
   rawDataSize: number;
   memorySize: number;
   localDiskSize: number;
+  /** How memory / disk split across vector and scalar parts; absent before the first calculation. */
+  breakdown?: SizingBreakdown;
   clusterNodeConfig: Record<NodesKeyType, NodesValueType>;
   standaloneNodeConfig: NodesValueType;
   dependencyConfig: DependencyConfigType;

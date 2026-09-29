@@ -14,7 +14,6 @@ import {
   MODE_OPTIONS,
   N_LIST_RANGE_CONFIG,
   M_RANGE_CONFIG,
-  MAXIMUM_AVERAGE_LENGTH,
   REFINE_OPTIONS,
   helmCodeExample,
   operatorCodeExample,
@@ -42,6 +41,7 @@ import {
   formatOutOfCalData,
 } from '@/utils/sizingTool';
 import { SizingVersionConfig } from '@/parts/sizingCommon';
+import { defaultScalarVersionConfig } from '@/utils/sizingScalar';
 export { baseValues } from '@/parts/sizingCommon';
 
 export const sizingV3Config: SizingVersionConfig = {
@@ -51,6 +51,7 @@ export const sizingV3Config: SizingVersionConfig = {
   extraNodeKey: 'streamNode',
   extraNodeLabelKey: 'setup.milvus.streamNode',
   extraNodeTipKey: 'setup.milvus.streamNodeTip',
+  scalar: defaultScalarVersionConfig,
   types: {
     ModeEnum,
     IndexTypeEnum,
@@ -67,7 +68,6 @@ export const sizingV3Config: SizingVersionConfig = {
     MODE_OPTIONS,
     N_LIST_RANGE_CONFIG,
     M_RANGE_CONFIG,
-    MAXIMUM_AVERAGE_LENGTH,
     REFINE_OPTIONS,
   },
   utils: {

@@ -13,7 +13,6 @@ import {
   MODE_OPTIONS,
   N_LIST_RANGE_CONFIG,
   M_RANGE_CONFIG,
-  MAXIMUM_AVERAGE_LENGTH,
   helmCodeExample,
   operatorCodeExample,
   HELM_CONFIG_FILE_NAME,
@@ -40,6 +39,7 @@ import {
   formatOutOfCalData,
 } from '@/utils/sizingToolV250';
 import { SizingVersionConfig } from '@/parts/sizingCommon';
+import { defaultScalarVersionConfig } from '@/utils/sizingScalar';
 export { baseValues } from '@/parts/sizingCommon';
 
 export const sizingV250Config: SizingVersionConfig = {
@@ -49,6 +49,7 @@ export const sizingV250Config: SizingVersionConfig = {
   extraNodeKey: 'indexNode',
   extraNodeLabelKey: 'setup.milvus.indexNode',
   extraNodeTipKey: 'setup.milvus.indexNodeTip',
+  scalar: defaultScalarVersionConfig,
   types: {
     ModeEnum,
     IndexTypeEnum,
@@ -64,7 +65,6 @@ export const sizingV250Config: SizingVersionConfig = {
     MODE_OPTIONS,
     N_LIST_RANGE_CONFIG,
     M_RANGE_CONFIG,
-    MAXIMUM_AVERAGE_LENGTH,
   },
   utils: {
     memoryAndDiskCalculator,

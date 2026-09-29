@@ -44,8 +44,14 @@
       "pk": "主键",
       "averageLength": "平均长度",
       "averageCapacity": "平均元素个数",
-      "elementType": "元素类型"
-    }
+      "elementType": "元素类型",
+      "index": "索引",
+      "indexNone": "无",
+      "pkStats": "主键统计",
+      "cardinality": "基数",
+      "cardinalityTip": "BITMAP 建议用于不同取值少于 {{max}} 个的字段。"
+    },
+    "offloadingScope": "作用于标量原始数据和 INVERTED 标量索引；其他标量索引类型仍常驻内存。假定映射数据中约 {{percent}}% 保持常驻。"
   },
   "overview": {
     "title": "资源需求",
@@ -63,6 +69,16 @@
       "milvusStorage": "Milvus 存储（Local PVC）",
       "s3Disk": "S3 Disk",
       "kafkaStorage": "Kafka 存储"
+    },
+    "breakdown": {
+      "vectorRaw": "向量原始数据",
+      "scalarRaw": "标量原始数据",
+      "vectorIndex": "向量索引",
+      "segmentBuffer": "Growing segment 缓冲",
+      "scalarRawMemory": "标量原始数据",
+      "scalarIndex": "标量索引",
+      "overhead": "各项均已包含 1.15 的运行期开销系数。",
+      "scalarMmap": "其中 {{size}} 为映射到磁盘的标量数据"
     }
   },
   "setup": {
