@@ -42,6 +42,7 @@
     "refineType": "Refine Type",
     "schema": {
       "field": "Field",
+      "indexTip": "How to choose scalar index?",
       "add": "Add Field",
       "remove": "Remove field",
       "pk": "PK",

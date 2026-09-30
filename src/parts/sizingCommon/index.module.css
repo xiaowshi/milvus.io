@@ -130,6 +130,17 @@ div.averageLabel {
     margin-bottom: 8px;
   }
 
+  .schemaHeaderRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+
+    .schemaHeader {
+      margin-bottom: 0;
+    }
+  }
+
   .schemaList {
     display: flex;
     flex-direction: column;

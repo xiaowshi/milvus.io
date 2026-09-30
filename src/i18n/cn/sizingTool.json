@@ -39,6 +39,7 @@
     "inlinePq": "inline_pq",
     "schema": {
       "field": "字段",
+      "indexTip": "如何选择标量索引？",
       "add": "添加字段",
       "remove": "删除字段",
       "pk": "主键",

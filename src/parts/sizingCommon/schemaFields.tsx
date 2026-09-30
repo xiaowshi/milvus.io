@@ -2,6 +2,7 @@ import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import classes from './index.module.css';
 import { SizingInput } from '@/components/sizing';
+import { ExternalLinkIcon } from '@/components/icons';
 import {
   Select,
   SelectTrigger,
@@ -120,7 +121,17 @@ export const SchemaFields = (props: SchemaFieldsProps) => {
 
   return (
     <div className={classes.schemaTable}>
-      <p className={classes.schemaHeader}>{t('form.schema.field')}</p>
+      <div className={classes.schemaHeaderRow}>
+        <p className={classes.schemaHeader}>{t('form.schema.field')}</p>
+        <a
+          className="flex items-center gap-[4px] font-[400] text-[12px] leading-[16px] text-black1 hover:underline"
+          href="https://milvus.io/docs/zh/scalar_index.md"
+          target="_blank"
+        >
+          {t('form.schema.indexTip')}
+          <ExternalLinkIcon />
+        </a>
+      </div>
       <ul className={classes.schemaList}>
         {fields.map((field, index) => {
           const typeOptions = field.primary
