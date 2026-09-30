@@ -29,6 +29,9 @@ interface SizingRangePropsType {
 const SLIDER_MIN = 0;
 const SLIDER_MAX = 100;
 const SLIDER_STEP = 1;
+const MARK_SNAP_RADIUS_PX = 8;
+const MIN_CONTINUOUS_GAP_PX = 8;
+const DRAG_THRESHOLD_PX = 4;
 
 export const SizingRange = (props: SizingRangePropsType) => {
   const {
@@ -74,6 +77,12 @@ export const SizingRange = (props: SizingRangePropsType) => {
   // for any browser where `'ontouchend' in document` is true (which includes
   // Chrome on macOS), so we drive the slider via our own pointer handlers.
   const trackInnerRef = useRef<HTMLDivElement | null>(null);
+  const activePointerRef = useRef<{
+    id: number;
+    startX: number;
+    startY: number;
+    isDragging: boolean;
+  } | null>(null);
 
   const setTrackInnerRef = useCallback(
     (node: HTMLDivElement | null, libraryRef: React.Ref<HTMLDivElement>) => {
@@ -88,7 +97,7 @@ export const SizingRange = (props: SizingRangePropsType) => {
     []
   );
 
-  const updateFromClientX = (clientX: number) => {
+  const updateFromClientX = (clientX: number, snapToMark = false) => {
     const el = trackInnerRef.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
@@ -97,7 +106,44 @@ export const SizingRange = (props: SizingRangePropsType) => {
     const newDomain = clampDomain(
       ratio * (SLIDER_MAX - SLIDER_MIN) + SLIDER_MIN
     );
-    const rangeValue = clampRange(Math.floor(toRangeValue(newDomain)));
+    let rangeValue = clampRange(Math.floor(toRangeValue(newDomain)));
+
+    if (snapToMark) {
+      const markPositions = rangeConfig.domain.map(domainValue => {
+        const domainRatio =
+          (domainValue - SLIDER_MIN) / (SLIDER_MAX - SLIDER_MIN);
+        return rect.left + domainRatio * rect.width;
+      });
+      const nearestMarkIndex = markPositions.reduce(
+        (nearestIndex, markPosition, index) =>
+          Math.abs(clientX - markPosition) <
+          Math.abs(clientX - markPositions[nearestIndex])
+            ? index
+            : nearestIndex,
+        0
+      );
+      const nearestMarkPosition = markPositions[nearestMarkIndex];
+      const previousMarkPosition = markPositions[nearestMarkIndex - 1];
+      const nextMarkPosition = markPositions[nearestMarkIndex + 1];
+      const nearestMarkGap = Math.min(
+        previousMarkPosition === undefined
+          ? Infinity
+          : nearestMarkPosition - previousMarkPosition,
+        nextMarkPosition === undefined
+          ? Infinity
+          : nextMarkPosition - nearestMarkPosition
+      );
+      // Keep dense marks separate while leaving room to select values between them.
+      const snapRadius = Math.min(
+        MARK_SNAP_RADIUS_PX,
+        Math.max(0, (nearestMarkGap - MIN_CONTINUOUS_GAP_PX) / 2)
+      );
+
+      if (Math.abs(clientX - nearestMarkPosition) <= snapRadius) {
+        rangeValue = rangeConfig.range[nearestMarkIndex];
+      }
+    }
+
     setInputValue(`${rangeValue}`);
     onRangeChange(rangeValue);
   };
@@ -106,15 +152,57 @@ export const SizingRange = (props: SizingRangePropsType) => {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     e.preventDefault();
     e.currentTarget.setPointerCapture(e.pointerId);
-    updateFromClientX(e.clientX);
+    activePointerRef.current = {
+      id: e.pointerId,
+      startX: e.clientX,
+      startY: e.clientY,
+      isDragging: false,
+    };
   };
 
   const handleTrackPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!e.currentTarget.hasPointerCapture(e.pointerId)) return;
-    updateFromClientX(e.clientX);
+    const activePointer = activePointerRef.current;
+    if (!activePointer || activePointer.id !== e.pointerId) return;
+
+    if (
+      !activePointer.isDragging &&
+      Math.hypot(
+        e.clientX - activePointer.startX,
+        e.clientY - activePointer.startY
+      ) >= DRAG_THRESHOLD_PX
+    ) {
+      activePointer.isDragging = true;
+    }
+
+    if (activePointer.isDragging) {
+      updateFromClientX(e.clientX);
+    }
   };
 
   const handleTrackPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    const activePointer = activePointerRef.current;
+    if (activePointer?.id === e.pointerId) {
+      const isDragging =
+        activePointer.isDragging ||
+        Math.hypot(
+          e.clientX - activePointer.startX,
+          e.clientY - activePointer.startY
+        ) >= DRAG_THRESHOLD_PX;
+      updateFromClientX(e.clientX, !isDragging);
+      activePointerRef.current = null;
+    }
+
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    }
+  };
+
+  const handleTrackPointerCancel = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (activePointerRef.current?.id === e.pointerId) {
+      activePointerRef.current = null;
+    }
+
     if (e.currentTarget.hasPointerCapture(e.pointerId)) {
       e.currentTarget.releasePointerCapture(e.pointerId);
     }
@@ -174,7 +262,7 @@ export const SizingRange = (props: SizingRangePropsType) => {
                 onPointerDown={handleTrackPointerDown}
                 onPointerMove={handleTrackPointerMove}
                 onPointerUp={handleTrackPointerUp}
-                onPointerCancel={handleTrackPointerUp}
+                onPointerCancel={handleTrackPointerCancel}
               >
                 <div
                   ref={node => setTrackInnerRef(node, trackProps.ref)}
