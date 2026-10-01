@@ -12,6 +12,8 @@ export function getStaticPaths() {
 
 export function getStaticProps({ params }) {
   return {
-    props: { locale: params.lang },
+    props: {
+      locale: params.lang,
+    },
   };
 }

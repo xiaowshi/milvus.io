@@ -197,11 +197,6 @@ const CURATED = {
           'Production use cases and customer stories.',
         ],
         [
-          'Milvus Demos',
-          `${ORIGIN}/milvus-demos`,
-          'Live demo applications, including reverse image search.',
-        ],
-        [
           'Bootcamp',
           `${ORIGIN}/bootcamp`,
           'Hands-on notebooks and end-to-end example projects.',

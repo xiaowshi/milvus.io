@@ -13,7 +13,10 @@ import {
   ModeEnum,
 } from '@/types/sizing';
 import { LanguageEnum } from '@/types/localization';
-import { fetchMilvusReleases } from '@/http/milvus';
+import {
+  FALLBACK_MILVUS_RELEASE,
+  fetchMilvusReleases,
+} from '@/http/milvus';
 import {
   Select,
   SelectContent,
@@ -33,11 +36,14 @@ const { etcdBaseValue, minioBaseValue, pulsarBaseValue, kafkaBaseValue } =
 
 type Props = {
   locale: LanguageEnum;
-  latestTag: string;
+  latestTag?: string;
 };
 
 export default function SizingTool(props: Props) {
-  const { locale = LanguageEnum.ENGLISH, latestTag } = props;
+  const {
+    locale = LanguageEnum.ENGLISH,
+    latestTag = FALLBACK_MILVUS_RELEASE,
+  } = props;
   const { t } = useTranslation('sizingTool', { lng: locale });
   // The shared sizing components call useTranslation() without a language, so
   // give them an instance pinned to this page's locale. Otherwise the server
@@ -53,9 +59,11 @@ export default function SizingTool(props: Props) {
     disabledLanguages,
     onLocaleChange,
   } = useGlobalLocale();
-  const currentVersion = SIZING_TOOL_VERSION_OPTIONS.find(
-    option => option.href === router.pathname
-  );
+  const currentVersion = router.asPath
+    .split('?')[0]
+    .endsWith('/tools/sizing-v250')
+    ? SIZING_TOOL_VERSION_OPTIONS[1]
+    : SIZING_TOOL_VERSION_OPTIONS[0];
   const [calculatedResult, setCalculatedResult] = useState<ICalculateResult>({
     rawDataSize: 0,
     memorySize: 0,
@@ -129,10 +137,15 @@ export default function SizingTool(props: Props) {
 
   const handleSelectVersion = (value: string) => {
     setSelectedVersion(value);
-    router.push(
+    const sizingPath =
       SIZING_TOOL_VERSION_OPTIONS.find(option => option.value === value)
-        ?.href || '/tools/sizing'
-    );
+        ?.href || '/tools/sizing';
+    const localizedPath =
+      activeLocale === LanguageEnum.ENGLISH
+        ? sizingPath
+        : `/${activeLocale}${sizingPath}`;
+
+    router.push(localizedPath);
   };
 
   return (

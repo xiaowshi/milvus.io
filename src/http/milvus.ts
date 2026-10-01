@@ -3,6 +3,7 @@ import axios from 'axios';
 
 const OWNER = 'milvus-io';
 const REPOSITORY = 'milvus';
+export const FALLBACK_MILVUS_RELEASE = 'v2.5.14';
 
 export const getGithubCommits = async (path: string, version: string) => {
   const res = await axios.get(
@@ -49,7 +50,6 @@ export const fetchMilvusReleases = async () => {
     const latestTag = validReleases[0].tag_name;
     return latestTag;
   } catch (error) {
-    console.log(error);
-    return 'v2.5.14';
+    return FALLBACK_MILVUS_RELEASE;
   }
 };

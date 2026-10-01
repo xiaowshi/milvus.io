@@ -750,6 +750,5 @@ These areas hold thousands of pages and are not enumerated here. Do not guess a 
 - [AI Quick Reference](https://milvus.io/ai-quick-reference): Short Q&A pages on vector search and AI topics, at `/ai-quick-reference/<question-slug>`.
 - [Learn AI and Vector DB](https://milvus.io/learn-ai-and-vectordb): Long-form explainers on vector databases and AI infrastructure.
 - [Use Cases](https://milvus.io/use-cases): Production use cases and customer stories.
-- [Milvus Demos](https://milvus.io/milvus-demos): Live demo applications, including reverse image search.
 - [Bootcamp](https://milvus.io/bootcamp): Hands-on notebooks and end-to-end example projects.
 - [Community](https://milvus.io/community): Contributing, governance, and community channels.

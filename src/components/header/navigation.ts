@@ -57,10 +57,6 @@ export const useHeaderNavItems = ({
             href: getLocalePath('/bootcamp'),
           },
           {
-            label: t('tutorials.demo'),
-            href: getLocalePath('/milvus-demos'),
-          },
-          {
             label: t('tutorials.video'),
             href: MILVUS_VIDEO_LINK,
             rel: 'noopener noreferrer',

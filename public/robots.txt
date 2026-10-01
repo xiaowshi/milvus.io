@@ -1,4 +1,9 @@
+# *
 User-agent: *
 Allow: /
 
+# Host
+Host: https://milvus.io
+
+# Sitemaps
 Sitemap: https://milvus.io/sitemap.xml

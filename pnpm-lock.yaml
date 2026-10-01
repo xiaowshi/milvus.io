@@ -82,9 +82,6 @@ importers:
       clsx:
         specifier: ^1.2.1
         version: 1.2.1
-      cropperjs:
-        specifier: ^1.6.2
-        version: 1.6.2
       csv-parser:
         specifier: ^3.2.1
         version: 3.2.1
@@ -154,18 +151,12 @@ importers:
       react-fast-marquee:
         specifier: ^1.6.5
         version: 1.6.5(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
-      react-file-drop:
-        specifier: ^3.1.6
-        version: 3.1.6
       react-helmet:
         specifier: ^6.1.0
         version: 6.1.0(react@19.3.0)
       react-i18next:
         specifier: ^14.1.3
         version: 14.1.3(i18next@23.16.8)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
-      react-masonry-css:
-        specifier: ^1.0.16
-        version: 1.0.16(react@19.3.0)
       react-player:
         specifier: ^2.16.0
         version: 2.16.0(react@19.3.0)
@@ -2133,9 +2124,6 @@ packages:
   convert-source-map@2.0.0:
     resolution: {integrity: sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg==}
 
-  cropperjs@1.6.2:
-    resolution: {integrity: sha512-nhymn9GdnV3CqiEHJVai54TULFAE3VshJTXSqSJKa8yXAKyBKDWdhHarnlIPrshJ0WMFTGuFvG02YjLXfPiuOA==}
-
   cross-spawn@7.0.6:
     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
     engines: {node: '>= 8'}
@@ -3390,9 +3378,6 @@ packages:
       react: '>= 16.8.0 || ^18.0.0'
       react-dom: '>= 16.8.0 || ^18.0.0'
 
-  react-file-drop@3.1.6:
-    resolution: {integrity: sha512-G1IKKP5ql0FYlWl7X5+ZEDQfzeF5bT4meV6vg3wySs1+NvPOZgoNxTZxAqayENzW+zOf/WVQ81FPaK+yLuryuw==}
-
   react-helmet@6.1.0:
     resolution: {integrity: sha512-4uMzEY9nlDlgxr61NL3XbKRy1hEkXmKNXhjbAIOVw5vcFrsdYbH2FEwcNyWvWinl103nXgzYNlns9ca+8kFiWw==}
     peerDependencies:
@@ -3425,11 +3410,6 @@ packages:
     peerDependencies:
       '@types/react': '>=18'
       react: '>=18'
-
-  react-masonry-css@1.0.16:
-    resolution: {integrity: sha512-KSW0hR2VQmltt/qAa3eXOctQDyOu7+ZBevtKgpNDSzT7k5LA/0XntNa9z9HKCdz3QlxmJHglTZ18e4sX4V8zZQ==}
-    peerDependencies:
-      react: '>=16.0.0'
 
   react-player@2.16.0:
     resolution: {integrity: sha512-mAIPHfioD7yxO0GNYVFD1303QFtI3lyyQZLY229UEAp/a10cSW+hPcakg0Keq8uWJxT2OiT/4Gt+Lc9bD6bJmQ==}
@@ -5955,8 +5935,6 @@ snapshots:
 
   convert-source-map@2.0.0: {}
 
-  cropperjs@1.6.2: {}
-
   cross-spawn@7.0.6:
     dependencies:
       path-key: 3.1.1
@@ -7506,10 +7484,6 @@ snapshots:
       react: 19.3.0
       react-dom: 19.3.0(react@19.3.0)
 
-  react-file-drop@3.1.6:
-    dependencies:
-      prop-types: 15.8.1
-
   react-helmet@6.1.0(react@19.3.0):
     dependencies:
       object-assign: 4.1.1
@@ -7549,10 +7523,6 @@ snapshots:
       vfile: 6.0.3
     transitivePeerDependencies:
       - supports-color
-
-  react-masonry-css@1.0.16(react@19.3.0):
-    dependencies:
-      react: 19.3.0
 
   react-player@2.16.0(react@19.3.0):
     dependencies:

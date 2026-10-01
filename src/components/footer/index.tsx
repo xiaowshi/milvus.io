@@ -83,11 +83,6 @@ const Footer = (props: Props) => {
           to: getLocalePath('/bootcamp'),
         },
         {
-          id: 'tutorial-2',
-          name: t(`common:v3trans.main.nav.demo`),
-          to: getLocalePath('/milvus-demos'),
-        },
-        {
           id: 'tutorial-3',
           name: t(`common:v3trans.main.nav.video`),
           to: MILVUS_VIDEO_LINK,

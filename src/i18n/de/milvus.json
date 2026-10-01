@@ -271,8 +271,7 @@
               "Produktsuche nach Produkt"
             ],
             "img": "cv",
-            "titleHref": "https://github.com/milvus-io/bootcamp/blob/master/EN_solutions/pic_search/README.md",
-            "href": "https://zilliz.com/milvus-demos/reverse-image-search"
+            "titleHref": "https://github.com/milvus-io/bootcamp/blob/master/EN_solutions/pic_search/README.md"
           },
           {
             "title": "Natürliche Sprachverarbeitung",
